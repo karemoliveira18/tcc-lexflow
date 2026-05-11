@@ -249,4 +249,4 @@ ISC
 
 ## 👥 Autor
 
-[Seu Nome] - TCC [Nome da Instituição] - [Ano]
+[karem oliveira] -  - [3b t.i]
