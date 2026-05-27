@@ -1,4 +1,4 @@
-const { prisma } = require('../db');
+import { prisma } from "../db.js";
 
 const getAllProcessos = async (req, res) => {
   try {
@@ -8,10 +8,10 @@ const getAllProcessos = async (req, res) => {
       where: { userId },
       include: {
         cliente: {
-          select: { id: true, nome: true, cpfCnpj: true }
-        }
+          select: { id: true, nome: true, cpfCnpj: true },
+        },
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: "desc" },
     });
 
     res.json(processos);
@@ -29,13 +29,19 @@ const getProcessoById = async (req, res) => {
       where: { id, userId },
       include: {
         cliente: {
-          select: { id: true, nome: true, cpfCnpj: true, email: true, telefone: true }
-        }
-      }
+          select: {
+            id: true,
+            nome: true,
+            cpfCnpj: true,
+            email: true,
+            telefone: true,
+          },
+        },
+      },
     });
 
     if (!processo) {
-      return res.status(404).json({ error: 'Processo não encontrado' });
+      return res.status(404).json({ error: "Processo não encontrado" });
     }
 
     res.json(processo);
@@ -46,21 +52,24 @@ const getProcessoById = async (req, res) => {
 
 const createProcesso = async (req, res) => {
   try {
-    const { titulo, area, prazo, status, descricao, prioridade, clienteId } = req.body;
+    const { titulo, area, prazo, status, descricao, prioridade, clienteId } =
+      req.body;
     const userId = req.user.userId;
 
     // Validações
     if (!titulo || !area || !prazo || !clienteId) {
-      return res.status(400).json({ error: 'Título, área, prazo e cliente são obrigatórios' });
+      return res
+        .status(400)
+        .json({ error: "Título, área, prazo e cliente são obrigatórios" });
     }
 
     // Verificar se cliente existe e pertence ao usuário
     const cliente = await prisma.cliente.findFirst({
-      where: { id: clienteId, userId }
+      where: { id: clienteId, userId },
     });
 
     if (!cliente) {
-      return res.status(404).json({ error: 'Cliente não encontrado' });
+      return res.status(404).json({ error: "Cliente não encontrado" });
     }
 
     const processo = await prisma.processo.create({
@@ -68,17 +77,17 @@ const createProcesso = async (req, res) => {
         titulo,
         area,
         prazo: new Date(prazo),
-        status: status || 'ativo',
+        status: status || "ativo",
         descricao,
-        prioridade: prioridade || 'normal',
+        prioridade: prioridade || "normal",
         userId,
-        clienteId
+        clienteId,
       },
       include: {
         cliente: {
-          select: { id: true, nome: true, cpfCnpj: true }
-        }
-      }
+          select: { id: true, nome: true, cpfCnpj: true },
+        },
+      },
     });
 
     res.status(201).json(processo);
@@ -95,11 +104,11 @@ const updateProcesso = async (req, res) => {
 
     // Verificar se processo existe e pertence ao usuário
     const processo = await prisma.processo.findFirst({
-      where: { id, userId }
+      where: { id, userId },
     });
 
     if (!processo) {
-      return res.status(404).json({ error: 'Processo não encontrado' });
+      return res.status(404).json({ error: "Processo não encontrado" });
     }
 
     const processoUpdated = await prisma.processo.update({
@@ -110,13 +119,13 @@ const updateProcesso = async (req, res) => {
         prazo: prazo ? new Date(prazo) : undefined,
         status: status || undefined,
         descricao: descricao || undefined,
-        prioridade: prioridade || undefined
+        prioridade: prioridade || undefined,
       },
       include: {
         cliente: {
-          select: { id: true, nome: true, cpfCnpj: true }
-        }
-      }
+          select: { id: true, nome: true, cpfCnpj: true },
+        },
+      },
     });
 
     res.json(processoUpdated);
@@ -132,27 +141,27 @@ const deleteProcesso = async (req, res) => {
 
     // Verificar se processo existe e pertence ao usuário
     const processo = await prisma.processo.findFirst({
-      where: { id, userId }
+      where: { id, userId },
     });
 
     if (!processo) {
-      return res.status(404).json({ error: 'Processo não encontrado' });
+      return res.status(404).json({ error: "Processo não encontrado" });
     }
 
     await prisma.processo.delete({
-      where: { id }
+      where: { id },
     });
 
-    res.json({ message: 'Processo excluído com sucesso' });
+    res.json({ message: "Processo excluído com sucesso" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-module.exports = {
+export {
   getAllProcessos,
   getProcessoById,
   createProcesso,
   updateProcesso,
-  deleteProcesso
+  deleteProcesso,
 };

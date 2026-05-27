@@ -1,12 +1,12 @@
-const express = require('express');
-const { authenticateToken } = require('../middleware/auth');
-const {
+import express from "express";
+import { authenticateToken } from "../middleware/auth.js";
+import {
   getAllClientes,
   getClienteById,
   createCliente,
   updateCliente,
-  deleteCliente
-} = require('../controllers/clienteController');
+  deleteCliente,
+} from "../controllers/clienteController.js";
 
 const router = express.Router();
 
@@ -14,18 +14,18 @@ const router = express.Router();
 router.use(authenticateToken);
 
 // GET /api/clientes - List all clients
-router.get('/', getAllClientes);
+router.get("/", getAllClientes);
 
 // GET /api/clientes/:id - Get client by ID
-router.get('/:id', getClienteById);
+router.get("/:id", getClienteById);
 
 // POST /api/clientes - Create new client
-router.post('/', createCliente);
+router.post("/", createCliente);
 
 // PUT /api/clientes/:id - Update client
-router.put('/:id', updateCliente);
+router.put("/:id", updateCliente);
 
 // DELETE /api/clientes/:id - Delete client
-router.delete('/:id', deleteCliente);
+router.delete("/:id", deleteCliente);
 
-module.exports = router;
+export default router;

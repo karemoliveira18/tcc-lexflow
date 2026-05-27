@@ -1,5 +1,9 @@
-const { prisma } = require('../db');
-const { hashPassword, comparePassword, generateToken } = require('../services/authService');
+import { prisma } from "../db.js";
+import {
+  hashPassword,
+  comparePassword,
+  generateToken,
+} from "../services/authService.js";
 
 const register = async (req, res) => {
   try {
@@ -7,16 +11,18 @@ const register = async (req, res) => {
 
     // Validação básica
     if (!email || !password || !nome) {
-      return res.status(400).json({ error: 'Email, senha e nome são obrigatórios' });
+      return res
+        .status(400)
+        .json({ error: "Email, senha e nome são obrigatórios" });
     }
 
     // Verificar se usuário já existe
     const userExists = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
     });
 
     if (userExists) {
-      return res.status(409).json({ error: 'Email já registrado' });
+      return res.status(409).json({ error: "Email já registrado" });
     }
 
     // Hash da senha
@@ -28,22 +34,22 @@ const register = async (req, res) => {
         email,
         password: hashedPassword,
         nome,
-        perfil: perfil || 'usuario'
-      }
+        perfil: perfil || "usuario",
+      },
     });
 
     // Gerar token
     const token = generateToken(user.id, user.email, user.perfil);
 
     res.status(201).json({
-      message: 'Usuário registrado com sucesso',
+      message: "Usuário registrado com sucesso",
       token,
       user: {
         id: user.id,
         email: user.email,
         nome: user.nome,
-        perfil: user.perfil
-      }
+        perfil: user.perfil,
+      },
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -56,37 +62,37 @@ const login = async (req, res) => {
 
     // Validação básica
     if (!email || !password) {
-      return res.status(400).json({ error: 'Email e senha são obrigatórios' });
+      return res.status(400).json({ error: "Email e senha são obrigatórios" });
     }
 
     // Buscar usuário
     const user = await prisma.user.findUnique({
-      where: { email }
+      where: { email },
     });
 
     if (!user) {
-      return res.status(401).json({ error: 'Credenciais inválidas' });
+      return res.status(401).json({ error: "Credenciais inválidas" });
     }
 
     // Validar senha
     const isPasswordValid = await comparePassword(password, user.password);
 
     if (!isPasswordValid) {
-      return res.status(401).json({ error: 'Credenciais inválidas' });
+      return res.status(401).json({ error: "Credenciais inválidas" });
     }
 
     // Gerar token
     const token = generateToken(user.id, user.email, user.perfil);
 
     res.json({
-      message: 'Login bem-sucedido',
+      message: "Login bem-sucedido",
       token,
       user: {
         id: user.id,
         email: user.email,
         nome: user.nome,
-        perfil: user.perfil
-      }
+        perfil: user.perfil,
+      },
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
@@ -103,12 +109,12 @@ const getProfile = async (req, res) => {
         nome: true,
         perfil: true,
         ativo: true,
-        createdAt: true
-      }
+        createdAt: true,
+      },
     });
 
     if (!user) {
-      return res.status(404).json({ error: 'Usuário não encontrado' });
+      return res.status(404).json({ error: "Usuário não encontrado" });
     }
 
     res.json(user);
@@ -117,4 +123,4 @@ const getProfile = async (req, res) => {
   }
 };
 
-module.exports = { register, login, getProfile };
+export { register, login, getProfile };

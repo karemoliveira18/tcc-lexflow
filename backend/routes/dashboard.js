@@ -1,10 +1,10 @@
-const express = require('express');
-const { authenticateToken } = require('../middleware/auth');
-const { getDashboardMetrics } = require('../controllers/dashboardController');
+import express from "express";
+import { authenticateToken } from "../middleware/auth.js";
+import { getDashboardMetrics } from "../controllers/dashboardController.js";
 
 const router = express.Router();
 
 // GET /api/dashboard/metrics - Get dashboard metrics
-router.get('/metrics', authenticateToken, getDashboardMetrics);
+router.get("/metrics", authenticateToken, getDashboardMetrics);
 
-module.exports = router;
+export default router;

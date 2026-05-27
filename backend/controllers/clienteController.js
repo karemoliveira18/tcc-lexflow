@@ -1,4 +1,4 @@
-const { prisma } = require('../db');
+import { prisma } from "../db.js";
 
 const getAllClientes = async (req, res) => {
   try {
@@ -6,7 +6,7 @@ const getAllClientes = async (req, res) => {
 
     const clientes = await prisma.cliente.findMany({
       where: { userId },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: "desc" },
     });
 
     res.json(clientes);
@@ -21,11 +21,11 @@ const getClienteById = async (req, res) => {
     const userId = req.user.userId;
 
     const cliente = await prisma.cliente.findFirst({
-      where: { id, userId }
+      where: { id, userId },
     });
 
     if (!cliente) {
-      return res.status(404).json({ error: 'Cliente não encontrado' });
+      return res.status(404).json({ error: "Cliente não encontrado" });
     }
 
     res.json(cliente);
@@ -36,21 +36,33 @@ const getClienteById = async (req, res) => {
 
 const createCliente = async (req, res) => {
   try {
-    const { nome, cpfCnpj, email, telefone, endereco, cidade, estado, cep, observacoes } = req.body;
+    const {
+      nome,
+      cpfCnpj,
+      email,
+      telefone,
+      endereco,
+      cidade,
+      estado,
+      cep,
+      observacoes,
+    } = req.body;
     const userId = req.user.userId;
 
     // Validação
     if (!nome || !cpfCnpj) {
-      return res.status(400).json({ error: 'Nome e CPF/CNPJ são obrigatórios' });
+      return res
+        .status(400)
+        .json({ error: "Nome e CPF/CNPJ são obrigatórios" });
     }
 
     // Verificar se CPF/CNPJ já existe
     const clienteExists = await prisma.cliente.findUnique({
-      where: { cpfCnpj }
+      where: { cpfCnpj },
     });
 
     if (clienteExists) {
-      return res.status(409).json({ error: 'CPF/CNPJ já registrado' });
+      return res.status(409).json({ error: "CPF/CNPJ já registrado" });
     }
 
     const cliente = await prisma.cliente.create({
@@ -64,8 +76,8 @@ const createCliente = async (req, res) => {
         estado,
         cep,
         observacoes,
-        userId
-      }
+        userId,
+      },
     });
 
     res.status(201).json(cliente);
@@ -78,15 +90,26 @@ const updateCliente = async (req, res) => {
   try {
     const { id } = req.params;
     const userId = req.user.userId;
-    const { nome, cpfCnpj, email, telefone, endereco, cidade, estado, cep, observacoes, ativo } = req.body;
+    const {
+      nome,
+      cpfCnpj,
+      email,
+      telefone,
+      endereco,
+      cidade,
+      estado,
+      cep,
+      observacoes,
+      ativo,
+    } = req.body;
 
     // Verificar se cliente existe e pertence ao usuário
     const cliente = await prisma.cliente.findFirst({
-      where: { id, userId }
+      where: { id, userId },
     });
 
     if (!cliente) {
-      return res.status(404).json({ error: 'Cliente não encontrado' });
+      return res.status(404).json({ error: "Cliente não encontrado" });
     }
 
     const clienteUpdated = await prisma.cliente.update({
@@ -101,14 +124,14 @@ const updateCliente = async (req, res) => {
         estado: estado || undefined,
         cep: cep || undefined,
         observacoes: observacoes || undefined,
-        ativo: ativo !== undefined ? ativo : undefined
-      }
+        ativo: ativo !== undefined ? ativo : undefined,
+      },
     });
 
     res.json(clienteUpdated);
   } catch (error) {
-    if (error.code === 'P2002') {
-      res.status(409).json({ error: 'CPF/CNPJ já está registrado' });
+    if (error.code === "P2002") {
+      res.status(409).json({ error: "CPF/CNPJ já está registrado" });
     } else {
       res.status(500).json({ error: error.message });
     }
@@ -122,27 +145,27 @@ const deleteCliente = async (req, res) => {
 
     // Verificar se cliente existe e pertence ao usuário
     const cliente = await prisma.cliente.findFirst({
-      where: { id, userId }
+      where: { id, userId },
     });
 
     if (!cliente) {
-      return res.status(404).json({ error: 'Cliente não encontrado' });
+      return res.status(404).json({ error: "Cliente não encontrado" });
     }
 
     await prisma.cliente.delete({
-      where: { id }
+      where: { id },
     });
 
-    res.json({ message: 'Cliente excluído com sucesso' });
+    res.json({ message: "Cliente excluído com sucesso" });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 };
 
-module.exports = {
+export {
   getAllClientes,
   getClienteById,
   createCliente,
   updateCliente,
-  deleteCliente
+  deleteCliente,
 };

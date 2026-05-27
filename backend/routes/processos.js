@@ -1,12 +1,12 @@
-const express = require('express');
-const { authenticateToken } = require('../middleware/auth');
-const {
+import express from "express";
+import { authenticateToken } from "../middleware/auth.js";
+import {
   getAllProcessos,
   getProcessoById,
   createProcesso,
   updateProcesso,
-  deleteProcesso
-} = require('../controllers/processoController');
+  deleteProcesso,
+} from "../controllers/processoController.js";
 
 const router = express.Router();
 
@@ -14,18 +14,18 @@ const router = express.Router();
 router.use(authenticateToken);
 
 // GET /api/processos - List all processes
-router.get('/', getAllProcessos);
+router.get("/", getAllProcessos);
 
 // GET /api/processos/:id - Get process by ID
-router.get('/:id', getProcessoById);
+router.get("/:id", getProcessoById);
 
 // POST /api/processos - Create new process
-router.post('/', createProcesso);
+router.post("/", createProcesso);
 
 // PUT /api/processos/:id - Update process
-router.put('/:id', updateProcesso);
+router.put("/:id", updateProcesso);
 
 // DELETE /api/processos/:id - Delete process
-router.delete('/:id', deleteProcesso);
+router.delete("/:id", deleteProcesso);
 
-module.exports = router;
+export default router;

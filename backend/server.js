@@ -1,12 +1,14 @@
-const express = require('express');
-const cors = require('cors');
-require('dotenv').config();
+import express from "express";
+import cors from "cors";
+import dotenv from "dotenv";
 
-const { initializeDatabase } = require('./db');
-const authRoutes = require('./routes/auth');
-const processosRoutes = require('./routes/processos');
-const clientesRoutes = require('./routes/clientes');
-const dashboardRoutes = require('./routes/dashboard');
+import { initializeDatabase } from "./db.js";
+import authRoutes from "./routes/auth.js";
+import processosRoutes from "./routes/processos.js";
+import clientesRoutes from "./routes/clientes.js";
+import dashboardRoutes from "./routes/dashboard.js";
+
+dotenv.config();
 
 const app = express();
 
@@ -15,14 +17,14 @@ app.use(cors());
 app.use(express.json());
 
 // Routes
-app.use('/api/auth', authRoutes);
-app.use('/api/processos', processosRoutes);
-app.use('/api/clientes', clientesRoutes);
-app.use('/api/dashboard', dashboardRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/processos", processosRoutes);
+app.use("/api/clientes", clientesRoutes);
+app.use("/api/dashboard", dashboardRoutes);
 
 // Health check
-app.get('/api/health', (req, res) => {
-  res.json({ status: 'OK', message: 'LexFlow API is running' });
+app.get("/api/health", (req, res) => {
+  res.json({ status: "OK", message: "LexFlow API is running" });
 });
 
 const PORT = process.env.PORT || 5000;
