@@ -1,38 +1,52 @@
-import React from 'react';
-import { Scale, FileText, Users, BarChart3, Settings, HelpCircle, Zap } from 'lucide-react';
+import React from "react";
+import {
+  Scale,
+  FileText,
+  Users,
+  BarChart3,
+  Settings,
+  HelpCircle,
+  Zap,
+  X,
+} from "lucide-react";
 
-const Sidebar = ({ activeSection, onSectionChange }) => {
+const Sidebar = ({ activeSection, onSectionChange, open = false, onClose }) => {
   const navigationItems = [
     {
-      id: 'dashboard',
-      label: 'Dashboard',
+      id: "dashboard",
+      label: "Dashboard",
       icon: BarChart3,
-      description: 'Visão geral e métricas'
+      description: "Visão geral e métricas",
     },
     {
-      id: 'processos',
-      label: 'Processos',
+      id: "processos",
+      label: "Processos",
       icon: FileText,
-      description: 'Gerenciar processos judiciais'
+      description: "Gerenciar processos judiciais",
     },
     {
-      id: 'clientes',
-      label: 'Clientes',
+      id: "clientes",
+      label: "Clientes",
       icon: Users,
-      description: 'Base de clientes'
+      description: "Base de clientes",
     },
     {
-      id: 'configuracoes',
-      label: 'Configurações',
+      id: "configuracoes",
+      label: "Configurações",
       icon: Settings,
-      description: 'Preferências do sistema'
-    }
+      description: "Preferências do sistema",
+    },
   ];
 
   return (
-    <div className="sidebar">
+    <div className={`sidebar ${open ? "open" : ""}`}>
       {/* Header da Sidebar */}
       <div className="sidebar-header">
+        <div className="sidebar-mobile-control lg:hidden">
+          <button type="button" className="sidebar-close-btn" onClick={onClose}>
+            <X size={20} />
+          </button>
+        </div>
         <div className="logo-section">
           <div className="logo-icon">
             <Scale size={20} />
@@ -56,8 +70,11 @@ const Sidebar = ({ activeSection, onSectionChange }) => {
           return (
             <button
               key={item.id}
-              className={`nav-item ${isActive ? 'active' : ''}`}
-              onClick={() => onSectionChange(item.id)}
+              className={`nav-item ${isActive ? "active" : ""}`}
+              onClick={() => {
+                onSectionChange(item.id);
+                onClose?.();
+              }}
               title={item.description}
             >
               <Icon className="nav-icon" size={18} />

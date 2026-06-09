@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
-
+const prisma = new PrismaClient();npm run dev
 async function initializeDatabase() {
   try {
     // Create the database and tables if they don't exist

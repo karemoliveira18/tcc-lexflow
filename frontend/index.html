@@ -2,28 +2,115 @@
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#0F172A" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="LexFlow Team" />
+    <meta
+      name="description"
+      content="LexFlow - Plataforma para gestão de processos jurídicos com cadastro de clientes, controle de prazos e painéis de métricas."
+    />
+    <meta
+      name="keywords"
+      content="LexFlow, gestão jurídica, processos jurídicos, clientes, dashboard, TCC"
+    />
+
+    <meta property="og:title" content="LexFlow - Gestão Jurídica" />
+    <meta
+      property="og:description"
+      content="Sistema web para controlar processos jurídicos, clientes e prazos com interface moderna e integração backend via API."
+    />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="http://localhost:5173" />
+    <meta property="og:image" content="/favicon.svg" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#0F172A" />
-    <title>LexFlow - Gestão Jurídica</title>
-    <meta
-      name="description"
-      content="LexFlow - Sistema de gestão de processos jurídicos"
-    />
+
+    <title>LexFlow | Gestão de Processos Jurídicos</title>
   </head>
-  <body>
-    <div class="page-shell">
-      <div class="page-accent page-accent-1"></div>
-      <div class="page-accent page-accent-2"></div>
-      <div class="page-accent page-accent-3"></div>
-      <div id="root"></div>
+  <body class="min-h-screen bg-slate-50 text-slate-900 font-sans antialiased">
+    <div id="root">
+      <div
+        class="app-shell"
+        style="
+          min-height: 100vh;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: #f8fafc;
+          color: #0f172a;
+        "
+      >
+        <div style="text-align: center; padding: 32px; max-width: 420px">
+          <h1 style="font-size: 1.75rem; margin-bottom: 16px">LexFlow</h1>
+          <p style="margin-bottom: 24px; color: #475569; line-height: 1.6">
+            Inicializando a plataforma de gestão jurídica. Aguarde enquanto o
+            painel é carregado.
+          </p>
+          <div
+            style="
+              display: inline-flex;
+              align-items: center;
+              gap: 12px;
+              padding: 12px 20px;
+              background: #0f172a;
+              color: #ffffff;
+              border-radius: 9999px;
+              font-weight: 600;
+              letter-spacing: 0.02em;
+            "
+          >
+            <span
+              style="
+                width: 12px;
+                height: 12px;
+                border-radius: 9999px;
+                background: #38bdf8;
+                display: inline-block;
+                animation: pulse 1.2s ease-in-out infinite;
+              "
+            ></span>
+            Carregando LexFlow...
+          </div>
+        </div>
+      </div>
     </div>
+
+    <noscript>
+      <div
+        style="
+          padding: 24px;
+          text-align: center;
+          background: #f8fafc;
+          color: #0f172a;
+        "
+      >
+        Esta aplicação requer JavaScript. Por favor, habilite o JavaScript no
+        seu navegador.
+      </div>
+    </noscript>
     <script type="module" src="/src/main.jsx"></script>
+    <style>
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 0.35;
+          transform: scale(1);
+        }
+        50% {
+          opacity: 1;
+          transform: scale(1.15);
+        }
+      }
+    </style>
   </body>
 </html>

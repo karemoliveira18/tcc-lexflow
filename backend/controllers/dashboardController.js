@@ -16,11 +16,6 @@ const getDashboardMetrics = async (req, res) => {
       _count: true,
     });
 
-    // Total de clientes
-    const totalClientes = await prisma.cliente.count({
-      where: { userId, ativo: true },
-    });
-
     // Processos por prioridade
     const processosPorPrioridade = await prisma.processo.groupBy({
       by: ["prioridade"],
@@ -28,9 +23,38 @@ const getDashboardMetrics = async (req, res) => {
       _count: true,
     });
 
-    // Processos vencidos (prazo menor que hoje)
+    // Processos por área
+    const processosPorArea = await prisma.processo.groupBy({
+      by: ["area"],
+      where: { userId },
+      _count: true,
+    });
+
+    // Total de clientes
+    const totalClientes = await prisma.cliente.count({
+      where: { userId, ativo: true },
+    });
+
+    // Contagens de status principais
+    const processosAtivos = await prisma.processo.count({
+      where: {
+        userId,
+        status: { not: "concluído" },
+      },
+    });
+
+    const processosConcluidos = await prisma.processo.count({
+      where: {
+        userId,
+        status: "concluído",
+      },
+    });
+
+    // Processos vencidos e próximos do vencimento
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
+    const seteDias = new Date(hoje);
+    seteDias.setDate(seteDias.getDate() + 7);
 
     const processosVencidos = await prisma.processo.count({
       where: {
@@ -42,11 +66,22 @@ const getDashboardMetrics = async (req, res) => {
       },
     });
 
-    // Processos por área
-    const processosPorArea = await prisma.processo.groupBy({
-      by: ["area"],
-      where: { userId },
-      _count: true,
+    const proximosVencimentos = await prisma.processo.findMany({
+      where: {
+        userId,
+        prazo: {
+          gte: hoje,
+          lte: seteDias,
+        },
+        status: { not: "concluído" },
+      },
+      orderBy: {
+        prazo: "asc",
+      },
+      take: 6,
+      include: {
+        cliente: true,
+      },
     });
 
     res.json({
@@ -54,6 +89,9 @@ const getDashboardMetrics = async (req, res) => {
         totalProcessos,
         totalClientes,
         processosVencidos,
+        processosAtivos,
+        processosConcluidos,
+        proximosVencimentosCount: proximosVencimentos.length,
       },
       processosPorStatus: processosPorStatus.map((item) => ({
         status: item.status,
@@ -66,6 +104,13 @@ const getDashboardMetrics = async (req, res) => {
       processosPorArea: processosPorArea.map((item) => ({
         area: item.area,
         quantidade: item._count,
+      })),
+      proximosVencimentos: proximosVencimentos.map((processo) => ({
+        id: processo.id,
+        titulo: processo.titulo,
+        prazo: processo.prazo,
+        cliente: processo.cliente?.nome || "Sem cliente",
+        prioridade: processo.prioridade,
       })),
     });
   } catch (error) {
