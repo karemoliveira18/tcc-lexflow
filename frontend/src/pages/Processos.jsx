@@ -4,6 +4,7 @@ import ProcessosTable from "../components/ProcessosTable";
 import ProcessoForm from "../components/ProcessoForm";
 import Alert from "../components/Alert";
 import { Plus } from "lucide-react";
+import ProcessosFetch from "../components/ProcessosFetch";
 
 export default function Processos() {
   const [processos, setProcessos] = useState([]);
@@ -135,6 +136,9 @@ export default function Processos() {
           onSave={handleSaveProcesso}
         />
       )}
+
+      {/* Componente demonstrativo que usa fetch() puro para obter/processos da API */}
+      <ProcessosFetch />
     </div>
   );
 }

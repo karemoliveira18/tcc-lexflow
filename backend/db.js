@@ -1,6 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();npm run dev
+// Inicializa o cliente Prisma
+// Corrigido: havia um texto residual ("npm run dev") na declaração que causava erro.
+const prisma = new PrismaClient();
 async function initializeDatabase() {
   try {
     // Create the database and tables if they don't exist

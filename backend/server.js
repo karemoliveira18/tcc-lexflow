@@ -7,6 +7,7 @@ import authRoutes from "./routes/auth.js";
 import processosRoutes from "./routes/processos.js";
 import clientesRoutes from "./routes/clientes.js";
 import dashboardRoutes from "./routes/dashboard.js";
+import usersRoutes from "./routes/users.js";
 
 dotenv.config();
 
@@ -21,6 +22,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/processos", processosRoutes);
 app.use("/api/clientes", clientesRoutes);
 app.use("/api/dashboard", dashboardRoutes);
+// Rotas de usuários (CRUD) adicionadas para AV2
+app.use("/api/users", usersRoutes);
 
 // Health check
 app.get("/api/health", (req, res) => {
