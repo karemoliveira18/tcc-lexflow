@@ -1,0 +1,208 @@
+{
+  "_type": "export",
+  "__export_format": 4,
+  "__export_date": "2026-06-08T00:00:00.000Z",
+  "__export_source": "insomnia.desktop.app:2026.1.0",
+  "resources": [
+    {
+      "_id": "wrk_lexflow",
+      "_type": "workspace",
+      "name": "LexFlow API",
+      "description": "Workspace para rotas API do projeto LexFlow",
+      "scope": "collection"
+    },
+    {
+      "_id": "fld_auth",
+      "_type": "request_group",
+      "parentId": "wrk_lexflow",
+      "name": "Auth",
+      "description": "Rotas de autenticação e perfil"
+    },
+    {
+      "_id": "fld_clientes",
+      "_type": "request_group",
+      "parentId": "wrk_lexflow",
+      "name": "Clientes",
+      "description": "Rotas de clientes"
+    },
+    {
+      "_id": "fld_processos",
+      "_type": "request_group",
+      "parentId": "wrk_lexflow",
+      "name": "Processos",
+      "description": "Rotas de processos"
+    },
+    {
+      "_id": "fld_dashboard",
+      "_type": "request_group",
+      "parentId": "wrk_lexflow",
+      "name": "Dashboard",
+      "description": "Rotas de métricas"
+    },
+    {
+      "_id": "req_health",
+      "_type": "request",
+      "parentId": "wrk_lexflow",
+      "name": "Health Check",
+      "method": "GET",
+      "url": "http://localhost:5000/api/health",
+      "headers": [],
+      "body": {
+        "mimeType": "application/json",
+        "text": ""
+      }
+    },
+    {
+      "_id": "req_register",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Cadastrar usuário",
+      "method": "POST",
+      "url": "http://localhost:5000/api/auth/register",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"admin@lexflow.com\",\n  \"password\": \"Senha123!\",\n  \"nome\": \"Administrador LexFlow\"\n}"
+      }
+    },
+    {
+      "_id": "req_login",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Login",
+      "method": "POST",
+      "url": "http://localhost:5000/api/auth/login",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"email\": \"admin@lexflow.com\",\n  \"password\": \"Senha123!\"\n}"
+      }
+    },
+    {
+      "_id": "req_profile",
+      "_type": "request",
+      "parentId": "fld_auth",
+      "name": "Perfil do usuário",
+      "method": "GET",
+      "url": "http://localhost:5000/api/auth/profile",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer <token>"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": ""
+      }
+    },
+    {
+      "_id": "req_clientes_list",
+      "_type": "request",
+      "parentId": "fld_clientes",
+      "name": "Listar clientes",
+      "method": "GET",
+      "url": "http://localhost:5000/api/clientes",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer <token>"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": ""
+      }
+    },
+    {
+      "_id": "req_clientes_create",
+      "_type": "request",
+      "parentId": "fld_clientes",
+      "name": "Criar cliente",
+      "method": "POST",
+      "url": "http://localhost:5000/api/clientes",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer <token>"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"nome\": \"Cliente Teste\",\n  \"cpfCnpj\": \"12345678901\",\n  \"email\": \"cliente@teste.com\",\n  \"telefone\": \"(11) 98888-7777\"\n}"
+      }
+    },
+    {
+      "_id": "req_processos_list",
+      "_type": "request",
+      "parentId": "fld_processos",
+      "name": "Listar processos",
+      "method": "GET",
+      "url": "http://localhost:5000/api/processos",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer <token>"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": ""
+      }
+    },
+    {
+      "_id": "req_processos_create",
+      "_type": "request",
+      "parentId": "fld_processos",
+      "name": "Criar processo",
+      "method": "POST",
+      "url": "http://localhost:5000/api/processos",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer <token>"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": "{\n  \"titulo\": \"Processo Teste\",\n  \"area\": \"Direito Civil\",\n  \"prazo\": \"2026-12-31\",\n  \"status\": \"ativo\",\n  \"prioridade\": \"normal\",\n  \"descricao\": \"Processo de teste para demonstração\",\n  \"clienteId\": \"<cliente-id>\"\n}"
+      }
+    },
+    {
+      "_id": "req_dashboard_metrics",
+      "_type": "request",
+      "parentId": "fld_dashboard",
+      "name": "Métricas do dashboard",
+      "method": "GET",
+      "url": "http://localhost:5000/api/dashboard/metrics",
+      "headers": [
+        {
+          "name": "Authorization",
+          "value": "Bearer <token>"
+        }
+      ],
+      "body": {
+        "mimeType": "application/json",
+        "text": ""
+      }
+    }
+  ]
+}
