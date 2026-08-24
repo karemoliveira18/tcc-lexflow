@@ -38,7 +38,7 @@ async function startServer() {
 
   app.listen(PORT, () => {
     console.log(`🚀 LexFlow API running on port ${PORT}`);
-    console.log(`📊 Database: SQLite`);
+    console.log(`📊 Database: MySQL`);
     console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
   });
 }
