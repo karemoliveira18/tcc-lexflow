@@ -64,6 +64,24 @@ export default function Processos() {
     setShowForm(true);
   };
 
+  // Exemplo simples usando fetch() (sem axios) para a AV2
+  const fetchProcessosWithFetch = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const base = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
+      const res = await fetch(`${base}/processos`);
+      if (!res.ok) throw new Error("Erro na resposta");
+      const data = await res.json();
+      setProcessos(data || []);
+    } catch (err) {
+      console.error("fetch() error:", err);
+      setError("Não foi possível carregar processos via fetch()");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleEditProcesso = (processo) => {
     setEditingProcesso(processo);
     setShowForm(true);
@@ -106,6 +124,13 @@ export default function Processos() {
         >
           <Plus className="mr-2" size={18} />
           Novo Processo
+        </button>
+        <button
+          type="button"
+          onClick={fetchProcessosWithFetch}
+          className="ml-3 inline-flex items-center justify-center rounded-full bg-slate-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-600 focus:outline-none"
+        >
+          Carregar via fetch()
         </button>
       </div>
 

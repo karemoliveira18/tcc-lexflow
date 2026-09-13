@@ -1,36 +1,105 @@
 import { prisma } from "../db.js";
+import { sendError } from "../utils/http.js";
 
 const getAllClientes = async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user?.userId;
+    const { search, ativo, page = 1, limit = 20 } = req.query;
 
-    const clientes = await prisma.cliente.findMany({
-      where: { userId },
-      orderBy: { createdAt: "desc" },
+    if (!userId) {
+      return sendError(res, {
+        status: 401,
+        code: "AUTH_REQUIRED",
+        message: "Token de autenticação obrigatório",
+        details: [],
+      });
+    }
+
+    const pageNumber = Number(page);
+    const limitNumber = Number(limit);
+    const searchTerm = typeof search === "string" ? search.trim() : "";
+    const ativoFilter = ativo === undefined ? true : ativo === "true" ? true : ativo === "false" ? false : undefined;
+
+    const where = {
+      userId,
+      ...(ativoFilter !== undefined ? { ativo: ativoFilter } : {}),
+      ...(searchTerm
+        ? {
+            OR: [
+              { nome: { contains: searchTerm, mode: "insensitive" } },
+              { cpfCnpj: { contains: searchTerm, mode: "insensitive" } },
+              { email: { contains: searchTerm, mode: "insensitive" } },
+            ],
+          }
+        : {}),
+    };
+
+    const [clientes, total] = await Promise.all([
+      prisma.cliente.findMany({
+        where,
+        orderBy: { createdAt: "desc" },
+        skip: (pageNumber - 1) * limitNumber,
+        take: limitNumber,
+      }),
+      prisma.cliente.count({ where }),
+    ]);
+
+    return res.json({
+      data: clientes,
+      pagination: {
+        page: pageNumber,
+        limit: limitNumber,
+        total,
+        totalPages: total === 0 ? 0 : Math.ceil(total / limitNumber),
+      },
     });
-
-    res.json(clientes);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Get all clientes error:", error);
+    return sendError(res, {
+      status: 500,
+      code: "INTERNAL_ERROR",
+      message: "Erro interno do servidor",
+      details: [],
+    });
   }
 };
 
 const getClienteById = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user.userId;
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      return sendError(res, {
+        status: 401,
+        code: "AUTH_REQUIRED",
+        message: "Token de autenticação obrigatório",
+        details: [],
+      });
+    }
 
     const cliente = await prisma.cliente.findFirst({
       where: { id, userId },
     });
 
     if (!cliente) {
-      return res.status(404).json({ error: "Cliente não encontrado" });
+      return sendError(res, {
+        status: 404,
+        code: "NOT_FOUND",
+        message: "Cliente não encontrado",
+        details: [],
+      });
     }
 
-    res.json(cliente);
+    return res.json(cliente);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Get cliente by id error:", error);
+    return sendError(res, {
+      status: 500,
+      code: "INTERNAL_ERROR",
+      message: "Erro interno do servidor",
+      details: [],
+    });
   }
 };
 
@@ -47,49 +116,78 @@ const createCliente = async (req, res) => {
       cep,
       observacoes,
     } = req.body;
-    const userId = req.user.userId;
+    const userId = req.user?.userId;
 
-    // Validação
-    if (!nome || !cpfCnpj) {
-      return res
-        .status(400)
-        .json({ error: "Nome e CPF/CNPJ são obrigatórios" });
+    if (!userId) {
+      return sendError(res, {
+        status: 401,
+        code: "AUTH_REQUIRED",
+        message: "Token de autenticação obrigatório",
+        details: [],
+      });
     }
 
-    // Verificar se CPF/CNPJ já existe
     const clienteExists = await prisma.cliente.findUnique({
       where: { cpfCnpj },
     });
 
     if (clienteExists) {
-      return res.status(409).json({ error: "CPF/CNPJ já registrado" });
+      return sendError(res, {
+        status: 409,
+        code: "CONFLICT",
+        message: "CPF/CNPJ já registrado",
+        details: [],
+      });
     }
 
     const cliente = await prisma.cliente.create({
       data: {
         nome,
         cpfCnpj,
-        email,
-        telefone,
-        endereco,
-        cidade,
-        estado,
-        cep,
-        observacoes,
+        email: email || null,
+        telefone: telefone || null,
+        endereco: endereco || null,
+        cidade: cidade || null,
+        estado: estado || null,
+        cep: cep || null,
+        observacoes: observacoes || null,
         userId,
       },
     });
 
-    res.status(201).json(cliente);
+    return res.status(201).json(cliente);
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Create cliente error:", error);
+    if (error?.code === "P2002") {
+      return sendError(res, {
+        status: 409,
+        code: "CONFLICT",
+        message: "CPF/CNPJ já está registrado",
+        details: [],
+      });
+    }
+    return sendError(res, {
+      status: 500,
+      code: "INTERNAL_ERROR",
+      message: "Erro interno do servidor",
+      details: [],
+    });
   }
 };
 
 const updateCliente = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user.userId;
+    const userId = req.user?.userId;
+
+    if (!userId) {
+      return sendError(res, {
+        status: 401,
+        code: "AUTH_REQUIRED",
+        message: "Token de autenticação obrigatório",
+        details: [],
+      });
+    }
     const {
       nome,
       cpfCnpj,
@@ -103,62 +201,109 @@ const updateCliente = async (req, res) => {
       ativo,
     } = req.body;
 
-    // Verificar se cliente existe e pertence ao usuário
     const cliente = await prisma.cliente.findFirst({
       where: { id, userId },
     });
 
     if (!cliente) {
-      return res.status(404).json({ error: "Cliente não encontrado" });
+      return sendError(res, {
+        status: 404,
+        code: "NOT_FOUND",
+        message: "Cliente não encontrado",
+        details: [],
+      });
+    }
+
+    if (ativo === true && !cliente.ativo && req.user?.perfil !== "admin") {
+      return sendError(res, {
+        status: 403,
+        code: "FORBIDDEN",
+        message: "Apenas o proprietário pode reativar este cliente",
+        details: [],
+      });
     }
 
     const clienteUpdated = await prisma.cliente.update({
       where: { id },
       data: {
-        nome: nome || undefined,
-        cpfCnpj: cpfCnpj || undefined,
-        email: email || undefined,
-        telefone: telefone || undefined,
-        endereco: endereco || undefined,
-        cidade: cidade || undefined,
-        estado: estado || undefined,
-        cep: cep || undefined,
-        observacoes: observacoes || undefined,
+        nome: nome ?? undefined,
+        cpfCnpj: cpfCnpj ?? undefined,
+        email: email ?? undefined,
+        telefone: telefone ?? null,
+        endereco: endereco ?? null,
+        cidade: cidade ?? null,
+        estado: estado ?? null,
+        cep: cep ?? null,
+        observacoes: observacoes ?? null,
         ativo: ativo !== undefined ? ativo : undefined,
       },
     });
 
-    res.json(clienteUpdated);
+    return res.json(clienteUpdated);
   } catch (error) {
-    if (error.code === "P2002") {
-      res.status(409).json({ error: "CPF/CNPJ já está registrado" });
-    } else {
-      res.status(500).json({ error: error.message });
+    console.error("Update cliente error:", error);
+    if (error?.code === "P2002") {
+      return sendError(res, {
+        status: 409,
+        code: "CONFLICT",
+        message: "CPF/CNPJ já está registrado",
+        details: [],
+      });
     }
+    return sendError(res, {
+      status: 500,
+      code: "INTERNAL_ERROR",
+      message: "Erro interno do servidor",
+      details: [],
+    });
   }
 };
 
 const deleteCliente = async (req, res) => {
   try {
     const { id } = req.params;
-    const userId = req.user.userId;
+    const userId = req.user?.userId;
 
-    // Verificar se cliente existe e pertence ao usuário
+    if (!userId) {
+      return sendError(res, {
+        status: 401,
+        code: "AUTH_REQUIRED",
+        message: "Token de autenticação obrigatório",
+        details: [],
+      });
+    }
+
     const cliente = await prisma.cliente.findFirst({
       where: { id, userId },
     });
 
     if (!cliente) {
-      return res.status(404).json({ error: "Cliente não encontrado" });
+      return sendError(res, {
+        status: 404,
+        code: "NOT_FOUND",
+        message: "Cliente não encontrado",
+        details: [],
+      });
     }
 
-    await prisma.cliente.delete({
+    if (!cliente.ativo) {
+      return res.json({ message: "Cliente já inativo" });
+    }
+
+    await prisma.cliente.update({
       where: { id },
+      data: { ativo: false },
     });
 
-    res.json({ message: "Cliente excluído com sucesso" });
+    return res.json({ message: "Cliente desativado com sucesso" });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Delete cliente error:", error);
+    return sendError(res, {
+      status: 500,
+      code: "INTERNAL_ERROR",
+      message: "Erro interno do servidor",
+      details: [],
+    });
   }
 };
 

@@ -37,14 +37,29 @@ api.interceptors.response.use(
 
 // ===== AUTH ENDPOINTS =====
 export const authAPI = {
-  register: (email, password, nome, perfil = 'usuario') =>
-    api.post('/auth/register', { email, password, nome, perfil }),
-  
   login: (email, password) =>
     api.post('/auth/login', { email, password }),
-  
+
   getProfile: () =>
     api.get('/auth/profile'),
+};
+
+// ===== USERS ENDPOINTS =====
+export const usersAPI = {
+  getAllUsers: (params = {}) =>
+    api.get('/users', { params }),
+
+  getUserById: (id) =>
+    api.get(`/users/${id}`),
+
+  createUser: (data) =>
+    api.post('/users', data),
+
+  updateUser: (id, data) =>
+    api.patch(`/users/${id}`, data),
+
+  deleteUser: (id) =>
+    api.delete(`/users/${id}`),
 };
 
 // ===== PROCESSOS ENDPOINTS =====

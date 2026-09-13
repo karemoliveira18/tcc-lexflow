@@ -1,16 +1,13 @@
 import express from "express";
 import { register, login, getProfile } from "../controllers/authController.js";
 import { authenticateToken } from "../middleware/auth.js";
+import { validateBody } from "../middleware/validate.js";
+import { registerSchema, loginSchema } from "../utils/validation.js";
 
 const router = express.Router();
 
-// POST /api/auth/register
-router.post("/register", register);
-
-// POST /api/auth/login
-router.post("/login", login);
-
-// GET /api/auth/profile
+router.post("/register", validateBody(registerSchema), register);
+router.post("/login", validateBody(loginSchema), login);
 router.get("/profile", authenticateToken, getProfile);
 
 export default router;

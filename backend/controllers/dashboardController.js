@@ -1,97 +1,106 @@
 import { prisma } from "../db.js";
+import { sendError } from "../utils/http.js";
 
 const getDashboardMetrics = async (req, res) => {
   try {
-    const userId = req.user.userId;
+    const userId = req.user?.userId;
 
-    // Total de processos
-    const totalProcessos = await prisma.processo.count({
-      where: { userId },
-    });
+    if (!userId) {
+      return sendError(res, {
+        status: 401,
+        code: "AUTH_REQUIRED",
+        message: "Token de autenticação obrigatório",
+        details: [],
+      });
+    }
 
-    // Processos por status
-    const processosPorStatus = await prisma.processo.groupBy({
-      by: ["status"],
-      where: { userId },
-      _count: true,
-    });
-
-    // Processos por prioridade
-    const processosPorPrioridade = await prisma.processo.groupBy({
-      by: ["prioridade"],
-      where: { userId },
-      _count: true,
-    });
-
-    // Processos por área
-    const processosPorArea = await prisma.processo.groupBy({
-      by: ["area"],
-      where: { userId },
-      _count: true,
-    });
-
-    // Total de clientes
-    const totalClientes = await prisma.cliente.count({
-      where: { userId, ativo: true },
-    });
-
-    // Contagens de status principais
-    const processosAtivos = await prisma.processo.count({
-      where: {
-        userId,
-        status: { not: "concluído" },
-      },
-    });
-
-    const processosConcluidos = await prisma.processo.count({
-      where: {
-        userId,
-        status: "concluído",
-      },
-    });
-
-    // Processos vencidos e próximos do vencimento
     const hoje = new Date();
     hoje.setHours(0, 0, 0, 0);
-    const seteDias = new Date(hoje);
-    seteDias.setDate(seteDias.getDate() + 7);
 
-    const processosVencidos = await prisma.processo.count({
-      where: {
-        userId,
-        prazo: {
-          lt: hoje,
+    const limiteSuperior = new Date(hoje);
+    limiteSuperior.setDate(limiteSuperior.getDate() + 8);
+
+    const baseWhere = { userId };
+    const processosNaoConcluidosWhere = {
+      ...baseWhere,
+      status: { not: "concluído" },
+    };
+    const proximosVencimentosWhere = {
+      ...processosNaoConcluidosWhere,
+      prazo: {
+        gte: hoje,
+        lt: limiteSuperior,
+      },
+    };
+    const processosVencidosWhere = {
+      ...processosNaoConcluidosWhere,
+      prazo: {
+        lt: hoje,
+      },
+    };
+
+    const [
+      totalProcessos,
+      processosPorStatus,
+      processosPorPrioridade,
+      processosPorArea,
+      totalClientes,
+      processosNaoConcluidos,
+      processosConcluidos,
+      processosVencidos,
+      proximosVencimentosCount,
+      proximosVencimentos,
+    ] = await Promise.all([
+      prisma.processo.count({ where: baseWhere }),
+      prisma.processo.groupBy({
+        by: ["status"],
+        where: baseWhere,
+        _count: true,
+      }),
+      prisma.processo.groupBy({
+        by: ["prioridade"],
+        where: baseWhere,
+        _count: true,
+      }),
+      prisma.processo.groupBy({
+        by: ["area"],
+        where: baseWhere,
+        _count: true,
+      }),
+      prisma.cliente.count({
+        where: { ...baseWhere, ativo: true },
+      }),
+      prisma.processo.count({
+        where: processosNaoConcluidosWhere,
+      }),
+      prisma.processo.count({
+        where: { ...baseWhere, status: "concluído" },
+      }),
+      prisma.processo.count({
+        where: processosVencidosWhere,
+      }),
+      prisma.processo.count({
+        where: proximosVencimentosWhere,
+      }),
+      prisma.processo.findMany({
+        where: proximosVencimentosWhere,
+        orderBy: { prazo: "asc" },
+        take: 6,
+        include: {
+          cliente: true,
         },
-        status: { not: "concluído" },
-      },
-    });
+      }),
+    ]);
 
-    const proximosVencimentos = await prisma.processo.findMany({
-      where: {
-        userId,
-        prazo: {
-          gte: hoje,
-          lte: seteDias,
-        },
-        status: { not: "concluído" },
-      },
-      orderBy: {
-        prazo: "asc",
-      },
-      take: 6,
-      include: {
-        cliente: true,
-      },
-    });
-
-    res.json({
+    return res.json({
       resumo: {
         totalProcessos,
         totalClientes,
         processosVencidos,
-        processosAtivos,
+        processosAtivos: processosNaoConcluidos,
+        processosNaoConcluidos,
         processosConcluidos,
-        proximosVencimentosCount: proximosVencimentos.length,
+        proximosVencimentosCount,
       },
       processosPorStatus: processosPorStatus.map((item) => ({
         status: item.status,
@@ -114,7 +123,13 @@ const getDashboardMetrics = async (req, res) => {
       })),
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Dashboard metrics error:", error);
+    return sendError(res, {
+      status: 500,
+      code: "INTERNAL_ERROR",
+      message: "Erro interno do servidor",
+      details: [],
+    });
   }
 };
 

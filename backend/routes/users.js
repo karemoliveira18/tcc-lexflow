@@ -1,5 +1,13 @@
 import express from "express";
 import { authenticateToken } from "../middleware/auth.js";
+import { requireAdmin } from "../middleware/authorization.js";
+import { validateBody, validateParams, validateQuery } from "../middleware/validate.js";
+import {
+  createUserSchema,
+  updateUserSchema,
+  idParamSchema,
+  listUsersQuerySchema,
+} from "../utils/validation.js";
 import {
   getAllUsers,
   getUserById,
@@ -10,13 +18,14 @@ import {
 
 const router = express.Router();
 
-// Rotas de usuário requerem autenticação (no dev o middleware fornece usuário seed)
 router.use(authenticateToken);
+router.use(requireAdmin);
 
-router.get("/", getAllUsers);
-router.get("/:id", getUserById);
-router.post("/", createUser);
-router.put("/:id", updateUser);
-router.delete("/:id", deleteUser);
+router.get("/", validateQuery(listUsersQuerySchema), getAllUsers);
+router.get("/:id", validateParams(idParamSchema), getUserById);
+router.post("/", validateBody(createUserSchema), createUser);
+router.patch("/:id", validateParams(idParamSchema), validateBody(updateUserSchema), updateUser);
+router.put("/:id", validateParams(idParamSchema), validateBody(updateUserSchema), updateUser);
+router.delete("/:id", validateParams(idParamSchema), deleteUser);
 
 export default router;

@@ -4,44 +4,39 @@ import {
   comparePassword,
   generateToken,
 } from "../services/authService.js";
+import { sendError } from "../utils/http.js";
 
 const register = async (req, res) => {
   try {
-    const { email, password, nome, perfil } = req.body;
+    const { email, password, nome } = req.body;
 
-    // Validação básica
-    if (!email || !password || !nome) {
-      return res
-        .status(400)
-        .json({ error: "Email, senha e nome são obrigatórios" });
-    }
-
-    // Verificar se usuário já existe
     const userExists = await prisma.user.findUnique({
       where: { email },
     });
 
     if (userExists) {
-      return res.status(409).json({ error: "Email já registrado" });
+      return sendError(res, {
+        status: 409,
+        code: "CONFLICT",
+        message: "Email já registrado",
+        details: [],
+      });
     }
 
-    // Hash da senha
     const hashedPassword = await hashPassword(password);
 
-    // Criar usuário
     const user = await prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         nome,
-        perfil: perfil || "usuario",
+        perfil: "usuario",
       },
     });
 
-    // Gerar token
     const token = generateToken(user.id, user.email, user.perfil);
 
-    res.status(201).json({
+    return res.status(201).json({
       message: "Usuário registrado com sucesso",
       token,
       user: {
@@ -52,7 +47,13 @@ const register = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Register error:", error);
+    return sendError(res, {
+      status: 500,
+      code: "INTERNAL_ERROR",
+      message: "Erro interno do servidor",
+      details: [],
+    });
   }
 };
 
@@ -60,31 +61,42 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // Validação básica
-    if (!email || !password) {
-      return res.status(400).json({ error: "Email e senha são obrigatórios" });
-    }
-
-    // Buscar usuário
     const user = await prisma.user.findUnique({
       where: { email },
     });
 
     if (!user) {
-      return res.status(401).json({ error: "Credenciais inválidas" });
+      return sendError(res, {
+        status: 401,
+        code: "AUTH_REQUIRED",
+        message: "Credenciais inválidas",
+        details: [],
+      });
     }
 
-    // Validar senha
+    if (!user.ativo) {
+      return sendError(res, {
+        status: 401,
+        code: "ACCOUNT_INACTIVE",
+        message: "Usuário inativo",
+        details: [],
+      });
+    }
+
     const isPasswordValid = await comparePassword(password, user.password);
 
     if (!isPasswordValid) {
-      return res.status(401).json({ error: "Credenciais inválidas" });
+      return sendError(res, {
+        status: 401,
+        code: "AUTH_REQUIRED",
+        message: "Credenciais inválidas",
+        details: [],
+      });
     }
 
-    // Gerar token
     const token = generateToken(user.id, user.email, user.perfil);
 
-    res.json({
+    return res.json({
       message: "Login bem-sucedido",
       token,
       user: {
@@ -95,7 +107,13 @@ const login = async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Login error:", error);
+    return sendError(res, {
+      status: 500,
+      code: "INTERNAL_ERROR",
+      message: "Erro interno do servidor",
+      details: [],
+    });
   }
 };
 
@@ -114,12 +132,35 @@ const getProfile = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ error: "Usuário não encontrado" });
+      return sendError(res, {
+        status: 401,
+        code: "AUTH_REQUIRED",
+        message: "Usuário não encontrado",
+        details: [],
+      });
     }
 
-    res.json(user);
+    if (!user.ativo) {
+      return sendError(res, {
+        status: 401,
+        code: "ACCOUNT_INACTIVE",
+        message: "Usuário inativo",
+        details: [],
+      });
+    }
+
+    return res.json({
+      ...user,
+      perfil: user.perfil,
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Profile error:", error);
+    return sendError(res, {
+      status: 500,
+      code: "INTERNAL_ERROR",
+      message: "Erro interno do servidor",
+      details: [],
+    });
   }
 };
 

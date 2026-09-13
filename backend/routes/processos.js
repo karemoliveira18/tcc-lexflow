@@ -1,5 +1,4 @@
 import express from "express";
-import { authenticateToken } from "../middleware/auth.js";
 import {
   getAllProcessos,
   getProcessoById,
@@ -7,25 +6,16 @@ import {
   updateProcesso,
   deleteProcesso,
 } from "../controllers/processoController.js";
+import { validateBody, validateParams, validateQuery } from "../middleware/validate.js";
+import { processoSchema, idParamSchema, listProcessosQuerySchema } from "../utils/validation.js";
 
 const router = express.Router();
 
-// Todas as rotas de processo requerem autenticação
-router.use(authenticateToken);
-
-// GET /api/processos - List all processes
-router.get("/", getAllProcessos);
-
-// GET /api/processos/:id - Get process by ID
-router.get("/:id", getProcessoById);
-
-// POST /api/processos - Create new process
-router.post("/", createProcesso);
-
-// PUT /api/processos/:id - Update process
-router.put("/:id", updateProcesso);
-
-// DELETE /api/processos/:id - Delete process
-router.delete("/:id", deleteProcesso);
+router.get("/", validateQuery(listProcessosQuerySchema), getAllProcessos);
+router.get("/:id", validateParams(idParamSchema), getProcessoById);
+router.post("/", validateBody(processoSchema), createProcesso);
+router.patch("/:id", validateParams(idParamSchema), validateBody(processoSchema.partial()), updateProcesso);
+router.put("/:id", validateParams(idParamSchema), validateBody(processoSchema.partial()), updateProcesso);
+router.delete("/:id", validateParams(idParamSchema), deleteProcesso);
 
 export default router;

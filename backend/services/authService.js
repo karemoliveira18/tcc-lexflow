@@ -11,9 +11,13 @@ const comparePassword = async (password, hashedPassword) => {
 };
 
 const generateToken = (userId, email, perfil) => {
+  if (!process.env.JWT_SECRET || String(process.env.JWT_SECRET).trim() === "") {
+    throw new Error("JWT_SECRET is required");
+  }
+
   return jwt.sign(
     { userId, email, perfil },
-    process.env.JWT_SECRET || "your_secret_key",
+    process.env.JWT_SECRET,
     { expiresIn: "7d" },
   );
 };

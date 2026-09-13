@@ -1,5 +1,4 @@
 import express from "express";
-import { authenticateToken } from "../middleware/auth.js";
 import {
   getAllClientes,
   getClienteById,
@@ -7,25 +6,16 @@ import {
   updateCliente,
   deleteCliente,
 } from "../controllers/clienteController.js";
+import { validateBody, validateParams, validateQuery } from "../middleware/validate.js";
+import { clienteSchema, idParamSchema, listClientesQuerySchema } from "../utils/validation.js";
 
 const router = express.Router();
 
-// Todas as rotas de cliente requerem autenticação
-router.use(authenticateToken);
-
-// GET /api/clientes - List all clients
-router.get("/", getAllClientes);
-
-// GET /api/clientes/:id - Get client by ID
-router.get("/:id", getClienteById);
-
-// POST /api/clientes - Create new client
-router.post("/", createCliente);
-
-// PUT /api/clientes/:id - Update client
-router.put("/:id", updateCliente);
-
-// DELETE /api/clientes/:id - Delete client
-router.delete("/:id", deleteCliente);
+router.get("/", validateQuery(listClientesQuerySchema), getAllClientes);
+router.get("/:id", validateParams(idParamSchema), getClienteById);
+router.post("/", validateBody(clienteSchema), createCliente);
+router.patch("/:id", validateParams(idParamSchema), validateBody(clienteSchema.partial()), updateCliente);
+router.put("/:id", validateParams(idParamSchema), validateBody(clienteSchema.partial()), updateCliente);
+router.delete("/:id", validateParams(idParamSchema), deleteCliente);
 
 export default router;
