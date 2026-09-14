@@ -2,6 +2,30 @@ import { prisma } from "../db.js";
 import { hashPassword } from "../services/authService.js";
 import { sendError } from "../utils/http.js";
 
+const ensureAdminSafety = async (userId, nextProfile = null) => {
+  const totalAdmins = await prisma.user.count({
+    where: {
+      perfil: "admin",
+      ativo: true,
+    },
+  });
+
+  if (nextProfile === "admin") {
+    return true;
+  }
+
+  const currentUser = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { perfil: true },
+  });
+
+  if (currentUser?.perfil === "admin" && totalAdmins <= 1) {
+    return false;
+  }
+
+  return true;
+};
+
 const getAllUsers = async (req, res) => {
   try {
     const { search, perfil, ativo, page = 1, limit = 20 } = req.query;
@@ -160,6 +184,18 @@ const updateUser = async (req, res) => {
       });
     }
 
+    if (perfil && perfil !== user.perfil) {
+      const safeTransition = await ensureAdminSafety(id, perfil);
+      if (!safeTransition) {
+        return sendError(res, {
+          status: 403,
+          code: "FORBIDDEN",
+          message: "Não é permitido remover o último administrador ativo",
+          details: [],
+        });
+      }
+    }
+
     const data = {
       email: email ?? undefined,
       nome: nome ?? undefined,
@@ -189,11 +225,21 @@ const updateUser = async (req, res) => {
   }
 };
 
-const deleteUser = async (req, res) => {
+const toggleUserStatus = async (req, res) => {
   try {
     const { id } = req.params;
-    const user = await prisma.user.findUnique({ where: { id } });
+    const { ativo } = req.body;
 
+    if (typeof ativo !== "boolean") {
+      return sendError(res, {
+        status: 400,
+        code: "VALIDATION_ERROR",
+        message: "O campo ativo é obrigatório e deve ser booleano",
+        details: [],
+      });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id } });
     if (!user) {
       return sendError(res, {
         status: 404,
@@ -203,18 +249,43 @@ const deleteUser = async (req, res) => {
       });
     }
 
-    if (!user.ativo) {
-      return res.json({ message: "Usuário já inativo" });
+    if (req.user.userId === id && !ativo) {
+      return sendError(res, {
+        status: 403,
+        code: "FORBIDDEN",
+        message: "Você não pode inativar a própria conta",
+        details: [],
+      });
     }
 
-    await prisma.user.update({
+    if (user.perfil === "admin" && ativo === false) {
+      const activeAdmins = await prisma.user.count({
+        where: {
+          perfil: "admin",
+          ativo: true,
+          id: { not: id },
+        },
+      });
+
+      if (activeAdmins === 0) {
+        return sendError(res, {
+          status: 403,
+          code: "FORBIDDEN",
+          message: "Não é permitido desativar o último administrador ativo",
+          details: [],
+        });
+      }
+    }
+
+    const updated = await prisma.user.update({
       where: { id },
-      data: { ativo: false },
+      data: { ativo },
+      select: { id: true, email: true, nome: true, perfil: true, ativo: true, createdAt: true },
     });
 
-    return res.json({ message: "Usuário desativado com sucesso" });
+    return res.json(updated);
   } catch (error) {
-    console.error("Delete user error:", error);
+    console.error("Toggle user status error:", error);
     return sendError(res, {
       status: 500,
       code: "INTERNAL_ERROR",
@@ -224,4 +295,4 @@ const deleteUser = async (req, res) => {
   }
 };
 
-export { getAllUsers, getUserById, createUser, updateUser, deleteUser };
+export { getAllUsers, getUserById, createUser, updateUser, toggleUserStatus };

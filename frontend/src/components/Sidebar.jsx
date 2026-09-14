@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Scale,
   FileText,
   Users,
   BarChart3,
@@ -9,8 +8,9 @@ import {
   Zap,
   X,
 } from "lucide-react";
+import Logo from "./Logo";
 
-const Sidebar = ({ activeSection, onSectionChange, open = false, onClose }) => {
+const Sidebar = ({ activeSection, onSectionChange, open = false, onClose, user }) => {
   const navigationItems = [
     {
       id: "dashboard",
@@ -30,6 +30,16 @@ const Sidebar = ({ activeSection, onSectionChange, open = false, onClose }) => {
       icon: Users,
       description: "Base de clientes",
     },
+    ...(user?.perfil === "admin"
+      ? [
+          {
+            id: "usuarios",
+            label: "Usuários",
+            icon: Users,
+            description: "Gestão de usuários e permissões",
+          },
+        ]
+      : []),
     {
       id: "configuracoes",
       label: "Configurações",
@@ -48,13 +58,7 @@ const Sidebar = ({ activeSection, onSectionChange, open = false, onClose }) => {
           </button>
         </div>
         <div className="logo-section">
-          <div className="logo-icon">
-            <Scale size={20} />
-          </div>
-          <div>
-            <div className="logo-text">LexFlow</div>
-            <div className="logo-subtitle">SaaS Jurídico</div>
-          </div>
+          <Logo size="sm" />
         </div>
         <p className="sidebar-description">
           Plataforma premium para gestão jurídica inteligente e eficiente.

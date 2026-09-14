@@ -4,8 +4,8 @@ const MetricCard = ({ title, value, description, icon: Icon, trend, trendValue }
   return (
     <div className="metric-card">
       <div className="flex items-center justify-between mb-4">
-        <div className="p-3 bg-slate-800 rounded-xl">
-          <Icon size={24} className="text-blue-400" />
+        <div className="metric-icon p-3 rounded-xl">
+          <Icon size={24} />
         </div>
         {trend && (
           <div className={`flex items-center gap-1 text-xs font-medium ${

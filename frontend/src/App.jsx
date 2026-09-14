@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Routes, Route, Navigate, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "./context/AuthContext";
 import Sidebar from "./components/Sidebar";
 import Header from "./components/Header";
 import LoginForm from "./components/LoginForm";
@@ -14,8 +15,6 @@ import "./styles/globals.css";
 import "./styles/dashboard.css";
 
 function AppLayout({ user, onLogout, setSidebarOpen, sidebarOpen, activeSection, setActiveSection }) {
-  const location = useLocation();
-
   const renderContent = () => {
     switch (activeSection) {
       case "dashboard":
@@ -32,7 +31,7 @@ function AppLayout({ user, onLogout, setSidebarOpen, sidebarOpen, activeSection,
             <div className="page-header">
               <h1>Configurações</h1>
             </div>
-            <div style={{ background: "white", padding: "20px", borderRadius: "12px" }}>
+            <div className="settings-placeholder">
               <p>Módulo de configurações em desenvolvimento.</p>
             </div>
           </div>
@@ -51,6 +50,7 @@ function AppLayout({ user, onLogout, setSidebarOpen, sidebarOpen, activeSection,
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
         userName={user?.nome}
+        user={user}
       />
 
       <div className="main-content">
@@ -67,43 +67,21 @@ function AppLayout({ user, onLogout, setSidebarOpen, sidebarOpen, activeSection,
 }
 
 function App() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [activeSection, setActiveSection] = useState("dashboard");
+  const { user, isAuthenticated, isInitializing, login, logout } = useAuth();
 
   const navigate = useNavigate();
   const location = useLocation();
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    const savedUser = localStorage.getItem("user");
-
-    if (token && savedUser) {
-      try {
-        setUser(JSON.parse(savedUser));
-        setIsAuthenticated(true);
-      } catch {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        setIsAuthenticated(false);
-        setUser(null);
-      }
-    }
-  }, []);
-
-  const handleLoginSuccess = (userData) => {
-    setUser(userData);
-    setIsAuthenticated(true);
-    const from = location.state?.from || "/dashboard";
+  const handleLoginSuccess = async (userData) => {
+    login(userData);
+    const from = new URLSearchParams(location.search).get("redirect") || location.state?.from || "/dashboard";
     navigate(from, { replace: true });
   };
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-    setUser(null);
-    setIsAuthenticated(false);
+    logout();
     navigate("/login", { replace: true });
   };
 
@@ -114,7 +92,7 @@ function App() {
         path="/login"
         element={
           isAuthenticated
-            ? <Navigate to="/dashboard" replace />
+            ? <Navigate to={new URLSearchParams(location.search).get("redirect") || "/dashboard"} replace />
             : <LoginForm onLoginSuccess={handleLoginSuccess} />
         }
       />
@@ -122,7 +100,7 @@ function App() {
       <Route
         path="/dashboard"
         element={
-          <ProtectedRoute isAuthenticated={isAuthenticated} user={user}>
+          <ProtectedRoute isAuthenticated={isAuthenticated} user={user} isInitializing={isInitializing}>
             <AppLayout
               user={user}
               onLogout={handleLogout}
@@ -138,7 +116,7 @@ function App() {
       <Route
         path="/clientes"
         element={
-          <ProtectedRoute isAuthenticated={isAuthenticated} user={user}>
+          <ProtectedRoute isAuthenticated={isAuthenticated} user={user} isInitializing={isInitializing}>
             <AppLayout
               user={user}
               onLogout={handleLogout}
@@ -154,7 +132,7 @@ function App() {
       <Route
         path="/processos"
         element={
-          <ProtectedRoute isAuthenticated={isAuthenticated} user={user}>
+          <ProtectedRoute isAuthenticated={isAuthenticated} user={user} isInitializing={isInitializing}>
             <AppLayout
               user={user}
               onLogout={handleLogout}
@@ -170,7 +148,7 @@ function App() {
       <Route
         path="/configuracoes"
         element={
-          <ProtectedRoute isAuthenticated={isAuthenticated} user={user}>
+          <ProtectedRoute isAuthenticated={isAuthenticated} user={user} isInitializing={isInitializing}>
             <AppLayout
               user={user}
               onLogout={handleLogout}
@@ -186,7 +164,7 @@ function App() {
       <Route
         path="/usuarios"
         element={
-          <ProtectedRoute isAuthenticated={isAuthenticated} user={user} requiredProfile="admin">
+          <ProtectedRoute isAuthenticated={isAuthenticated} user={user} isInitializing={isInitializing} requiredProfile="admin">
             <AppLayout
               user={user}
               onLogout={handleLogout}

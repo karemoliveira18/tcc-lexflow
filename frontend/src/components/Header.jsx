@@ -42,21 +42,21 @@ const Header = ({ onMenuToggle, userName = "Usuário", onLogout }) => {
           </Button>
 
           {/* Perfil do usuário */}
-          <div className="flex items-center gap-3 pl-4 border-l border-slate-700">
-            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
-              <User size={16} className="text-white" />
+          <div className="user-menu flex items-center gap-3 pl-4">
+            <div className="user-avatar">
+              <User size={16} />
             </div>
-            <div className="hidden sm:block">
-              <p className="text-sm font-medium text-slate-200">{userName}</p>
-              <p className="text-xs text-slate-400">Online</p>
+            <div className="user-details hidden sm:block">
+              <p className="text-sm font-medium">{userName}</p>
+              <p className="text-xs">Online</p>
             </div>
             {onLogout && (
               <button
                 onClick={onLogout}
-                className="ml-2 p-2 hover:bg-slate-700 rounded-lg transition-colors"
+                className="logout-button ml-2 p-2 rounded-lg transition-colors"
                 title="Logout"
               >
-                <LogOut size={16} className="text-slate-400 hover:text-slate-200" />
+                <LogOut size={16} />
               </button>
             )}
           </div>

@@ -48,7 +48,7 @@ test('partial update schemas accept valid values', () => {
   assert.equal(processoSchema.parse({
     titulo: 'Processo teste',
     area: 'Civil',
-    prazo: '2026-10-10T10:00:00.000Z',
+    prazo: '2026-10-10',
     clienteId: 'client-123',
   }).status, 'ativo');
 });
@@ -66,8 +66,8 @@ test('pagination and filter query schemas enforce defaults and limits', () => {
   assert.equal(invalidClientes.success, false);
 
   const validProcessos = listProcessosQuerySchema.parse({
-    prazoDe: '2026-10-01T00:00:00.000Z',
-    prazoAte: '2026-10-10T00:00:00.000Z',
+    prazoDe: '2026-10-01',
+    prazoAte: '2026-10-10',
   });
   assert.equal(validProcessos.page, 1);
   assert.equal(validProcessos.limit, 20);

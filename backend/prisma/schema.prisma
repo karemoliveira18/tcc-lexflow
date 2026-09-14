@@ -29,7 +29,7 @@ model User {
 model Cliente {
   id           String   @id @default(cuid())
   nome         String
-  cpfCnpj      String   @unique
+  cpfCnpj      String
   email        String?
   telefone     String?
   endereco     String?
@@ -44,6 +44,8 @@ model Cliente {
   userId   String
   user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   processos Processo[]
+
+  @@unique([userId, cpfCnpj])
 }
 
 model Processo {
@@ -57,8 +59,8 @@ model Processo {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  userId   String
-  user     User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   clienteId String
-  cliente   Cliente  @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  cliente   Cliente  @relation(fields: [clienteId], references: [id], onDelete: Restrict)
 }

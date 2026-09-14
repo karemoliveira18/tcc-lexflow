@@ -3,7 +3,10 @@ import { z } from 'zod';
 const MAX_TEXT_LENGTH = 191;
 const CEP_REGEX = /^\d{5}-?\d{3}$/;
 const UF_REGEX = /^[A-Z]{2}$/;
+const DATE_ONLY_REGEX = /^\d{4}-\d{2}-\d{2}$/;
 const ISO_DATE_REGEX = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:?\d{2})?$/;
+
+const isValidDateInput = (value) => DATE_ONLY_REGEX.test(value) || ISO_DATE_REGEX.test(value) || !Number.isNaN(new Date(value).getTime());
 
 const normalizeString = (value) => {
   if (typeof value !== 'string') return value;
@@ -124,6 +127,7 @@ const createUserSchema = z.object({
 
 const updateUserSchema = z.object({
   email: emailSchema.optional(),
+  password: passwordSchema.optional(),
   nome: nameSchema.optional(),
   perfil: z.enum(['admin', 'advogado', 'usuario']).optional(),
   ativo: z.boolean().optional(),
@@ -153,9 +157,9 @@ const clienteSchema = z.object({
 const processoSchema = z.object({
   titulo: titleSchema,
   area: stringLength('Área', 2, 191),
-  prazo: z.string({ required_error: 'Prazo é obrigatório', invalid_type_error: 'Prazo deve ser texto ISO' })
+  prazo: z.string({ required_error: 'Prazo é obrigatório', invalid_type_error: 'Prazo deve ser texto no formato YYYY-MM-DD' })
     .transform(normalizeString)
-    .refine((value) => ISO_DATE_REGEX.test(value), { message: 'Data inválida' }),
+    .refine((value) => isValidDateInput(value), { message: 'Data inválida. Use o formato YYYY-MM-DD ou ISO-8601' }),
   status: z.enum(['ativo', 'aguardando', 'concluído', 'suspenso']).optional().default('ativo'),
   descricao: optionalTextSchema,
   prioridade: z.enum(['baixa', 'normal', 'alta']).optional().default('normal'),
@@ -192,8 +196,8 @@ const listProcessosQuerySchema = z.object({
   prioridade: z.enum(['baixa', 'normal', 'alta']).optional(),
   area: z.string().trim().max(191).optional(),
   clienteId: z.string().min(1).optional(),
-  prazoDe: z.string().refine((value) => !Number.isNaN(Date.parse(value)), { message: 'prazoDe deve ser uma data válida' }).optional(),
-  prazoAte: z.string().refine((value) => !Number.isNaN(Date.parse(value)), { message: 'prazoAte deve ser uma data válida' }).optional(),
+  prazoDe: z.string().refine((value) => isValidDateInput(value), { message: 'prazoDe deve ser uma data válida no formato YYYY-MM-DD ou ISO-8601' }).optional(),
+  prazoAte: z.string().refine((value) => isValidDateInput(value), { message: 'prazoAte deve ser uma data válida no formato YYYY-MM-DD ou ISO-8601' }).optional(),
 }).strict();
 
 const validateData = (schema, value) => schema.safeParse(value);

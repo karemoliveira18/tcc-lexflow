@@ -30,7 +30,21 @@ api.interceptors.response.use(
     return response;
   },
   (error) => {
-    console.error('API Error:', error.response?.data || error.message);
+    const status = error.response?.status;
+
+    if (status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+
+      if (window.location.pathname !== '/login') {
+        window.location.assign('/login');
+      }
+    }
+
+    if (status !== 403) {
+      console.error('API Error:', error.response?.data || error.message);
+    }
+
     return Promise.reject(error);
   }
 );
@@ -56,10 +70,10 @@ export const usersAPI = {
     api.post('/users', data),
 
   updateUser: (id, data) =>
-    api.patch(`/users/${id}`, data),
+    api.put(`/users/${id}`, data),
 
-  deleteUser: (id) =>
-    api.delete(`/users/${id}`),
+  toggleUserStatus: (id, data) =>
+    api.patch(`/users/${id}/status`, data),
 };
 
 // ===== PROCESSOS ENDPOINTS =====

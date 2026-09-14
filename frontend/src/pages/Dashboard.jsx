@@ -262,7 +262,7 @@ export default function Dashboard() {
                 />
                 <Tooltip
                   contentStyle={{
-                    background: "#0f172a",
+                    background: "#121212",
                     border: "1px solid rgba(148, 163, 184, 0.2)",
                     borderRadius: "16px",
                     color: "#f8fafc",
@@ -276,7 +276,7 @@ export default function Dashboard() {
                 <Bar
                   dataKey="quantidade"
                   name="Processos"
-                  fill="#38bdf8"
+                  fill="#D4AF37"
                   radius={[12, 12, 0, 0]}
                 />
               </BarChart>

@@ -13,7 +13,7 @@ import {
   getUserById,
   createUser,
   updateUser,
-  deleteUser,
+  toggleUserStatus,
 } from "../controllers/userController.js";
 
 const router = express.Router();
@@ -26,6 +26,6 @@ router.get("/:id", validateParams(idParamSchema), getUserById);
 router.post("/", validateBody(createUserSchema), createUser);
 router.patch("/:id", validateParams(idParamSchema), validateBody(updateUserSchema), updateUser);
 router.put("/:id", validateParams(idParamSchema), validateBody(updateUserSchema), updateUser);
-router.delete("/:id", validateParams(idParamSchema), deleteUser);
+router.patch("/:id/status", validateParams(idParamSchema), toggleUserStatus);
 
 export default router;

@@ -1,6 +1,9 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
+import path from "path";
+import { existsSync } from "fs";
+import { fileURLToPath } from "url";
 
 import { validateEnvironment, parseCorsOrigins } from "./config/env.js";
 import { initializeDatabase, prisma } from "./db.js";
@@ -17,6 +20,9 @@ dotenv.config();
 const env = validateEnvironment();
 const app = express();
 const allowedOrigins = parseCorsOrigins();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const frontendDistPath = path.resolve(__dirname, "../frontend/dist");
 
 const corsOptions = {
   origin: (origin, callback) => {
@@ -28,7 +34,7 @@ const corsOptions = {
       return callback(null, true);
     }
 
-    return callback(null, false);
+    return callback(new Error("Not allowed by CORS"));
   },
   credentials: true,
   methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
@@ -45,15 +51,35 @@ app.get("/api/health", (req, res) => {
   res.json({ status: "OK", message: "LexFlow API is running" });
 });
 
-app.use("/api", authenticateToken);
-app.use("/api/processos", processosRoutes);
-app.use("/api/clientes", clientesRoutes);
-app.use("/api/dashboard", dashboardRoutes);
-app.use("/api/users", usersRoutes);
+app.use("/api/processos", authenticateToken, processosRoutes);
+app.use("/api/clientes", authenticateToken, clientesRoutes);
+app.use("/api/dashboard", authenticateToken, dashboardRoutes);
+app.use("/api/users", authenticateToken, usersRoutes);
+
+if (existsSync(frontendDistPath)) {
+  app.use(express.static(frontendDistPath));
+
+  app.get(/^(?!\/api).*/, (req, res) => {
+    return res.sendFile(path.join(frontendDistPath, "index.html"));
+  });
+}
 
 const PORT = Number(process.env.PORT || 5000);
 
 app.use((req, res) => {
+  if (req.path.startsWith("/api")) {
+    return sendError(res, {
+      status: 404,
+      code: "NOT_FOUND",
+      message: "Recurso não encontrado",
+      details: [],
+    });
+  }
+
+  if (existsSync(frontendDistPath)) {
+    return res.sendFile(path.join(frontendDistPath, "index.html"));
+  }
+
   return sendError(res, {
     status: 404,
     code: "NOT_FOUND",

@@ -127,15 +127,15 @@ const createCliente = async (req, res) => {
       });
     }
 
-    const clienteExists = await prisma.cliente.findUnique({
-      where: { cpfCnpj },
+    const clienteExists = await prisma.cliente.findFirst({
+      where: { userId, cpfCnpj },
     });
 
     if (clienteExists) {
       return sendError(res, {
         status: 409,
         code: "CONFLICT",
-        message: "CPF/CNPJ já registrado",
+        message: "CPF/CNPJ já registrado para este usuário",
         details: [],
       });
     }
@@ -223,18 +223,37 @@ const updateCliente = async (req, res) => {
       });
     }
 
+    if (cpfCnpj !== undefined) {
+      const duplicate = await prisma.cliente.findFirst({
+        where: {
+          userId,
+          cpfCnpj,
+          id: { not: id },
+        },
+      });
+
+      if (duplicate) {
+        return sendError(res, {
+          status: 409,
+          code: "CONFLICT",
+          message: "CPF/CNPJ já registrado para este usuário",
+          details: [],
+        });
+      }
+    }
+
     const clienteUpdated = await prisma.cliente.update({
       where: { id },
       data: {
-        nome: nome ?? undefined,
-        cpfCnpj: cpfCnpj ?? undefined,
-        email: email ?? undefined,
-        telefone: telefone ?? null,
-        endereco: endereco ?? null,
-        cidade: cidade ?? null,
-        estado: estado ?? null,
-        cep: cep ?? null,
-        observacoes: observacoes ?? null,
+        nome: nome !== undefined ? nome : undefined,
+        cpfCnpj: cpfCnpj !== undefined ? cpfCnpj : undefined,
+        email: email !== undefined ? email : undefined,
+        telefone: telefone !== undefined ? telefone : undefined,
+        endereco: endereco !== undefined ? endereco : undefined,
+        cidade: cidade !== undefined ? cidade : undefined,
+        estado: estado !== undefined ? estado : undefined,
+        cep: cep !== undefined ? cep : undefined,
+        observacoes: observacoes !== undefined ? observacoes : undefined,
         ativo: ativo !== undefined ? ativo : undefined,
       },
     });
@@ -282,6 +301,19 @@ const deleteCliente = async (req, res) => {
         status: 404,
         code: "NOT_FOUND",
         message: "Cliente não encontrado",
+        details: [],
+      });
+    }
+
+    const processosVinculados = await prisma.processo.count({
+      where: { clienteId: id, userId },
+    });
+
+    if (processosVinculados > 0) {
+      return sendError(res, {
+        status: 409,
+        code: "CONFLICT",
+        message: "Não é possível excluir cliente com processos vinculados. Inative-o em vez disso.",
         details: [],
       });
     }

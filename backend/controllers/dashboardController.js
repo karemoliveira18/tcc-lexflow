@@ -1,5 +1,6 @@
 import { prisma } from "../db.js";
 import { sendError } from "../utils/http.js";
+import { serializeDateOnly } from "../utils/date.js";
 
 const getDashboardMetrics = async (req, res) => {
   try {
@@ -117,7 +118,7 @@ const getDashboardMetrics = async (req, res) => {
       proximosVencimentos: proximosVencimentos.map((processo) => ({
         id: processo.id,
         titulo: processo.titulo,
-        prazo: processo.prazo,
+        prazo: serializeDateOnly(processo.prazo),
         cliente: processo.cliente?.nome || "Sem cliente",
         prioridade: processo.prioridade,
       })),

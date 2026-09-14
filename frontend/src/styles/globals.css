@@ -1,4 +1,4 @@
-/* Global Styles */
+/* LexFlow visual foundation */
 
 * {
   margin: 0;
@@ -7,9 +7,9 @@
 }
 
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background: #f5f7fa;
-  color: #333;
+  font-family: "Inter", "Segoe UI", sans-serif;
+  background: #080808;
+  color: #f5f1e7;
 }
 
 /* Layout */
@@ -42,7 +42,7 @@ body {
 
 .page-header h1 {
   font-size: 28px;
-  color: #333;
+  color: #f5f1e7;
   font-weight: 600;
 }
 
@@ -65,19 +65,19 @@ body {
 }
 
 .btn-primary {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
+  background: #d4af37;
+  color: #080808;
   padding: 12px 20px;
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 22px rgba(102, 126, 234, 0.24);
+  box-shadow: 0 10px 22px rgba(212, 175, 55, 0.22);
 }
 
 .btn-secondary {
-  background: #f2f4f8;
-  color: #2d3a5b;
+  background: #1c1c1c;
+  color: #f3d27a;
   padding: 12px 20px;
 }
 
@@ -104,14 +104,14 @@ body {
 }
 
 .btn-edit {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: rgba(212, 175, 55, 0.12);
+  color: #f3d27a;
   padding: 8px;
   border-radius: 6px;
 }
 
 .btn-edit:hover {
-  background: #bbdefb;
+  background: rgba(212, 175, 55, 0.2);
 }
 
 .btn-delete {
@@ -170,10 +170,10 @@ body {
 /* Tables */
 .processos-table,
 .clientes-table {
-  background: white;
+  background: #121212;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.2);
 }
 
 table {
@@ -182,15 +182,15 @@ table {
 }
 
 thead {
-  background: #f8f9fa;
-  border-bottom: 2px solid #e0e0e0;
+  background: #181818;
+  border-bottom: 1px solid #34302a;
 }
 
 th {
   padding: 16px;
   text-align: left;
   font-weight: 600;
-  color: #666;
+  color: #b9ad93;
   font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -198,7 +198,7 @@ th {
 
 td {
   padding: 16px;
-  border-bottom: 1px solid #e8e8e8;
+  border-bottom: 1px solid #292929;
   font-size: 13px;
 }
 
@@ -213,7 +213,7 @@ tbody tr:hover {
 td.titulo,
 td.nome {
   font-weight: 600;
-  color: #333;
+  color: #f5f1e7;
 }
 
 .actions {
@@ -493,7 +493,7 @@ td.nome {
   align-items: center;
   justify-content: space-between;
   padding: 14px;
-  background: #f8f9fa;
+  background: rgba(212, 175, 55, 0.05);
   border-radius: 10px;
   font-size: 14px;
 }

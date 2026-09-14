@@ -11,14 +11,14 @@ async function main() {
     update: {
       nome: "Administrador LexFlow",
       password: passwordHash,
-      perfil: "advogado",
+      perfil: "admin",
       ativo: true,
     },
     create: {
       email: "admin@lexflow.com",
       password: passwordHash,
       nome: "Administrador LexFlow",
-      perfil: "advogado",
+      perfil: "admin",
       ativo: true,
     },
   });

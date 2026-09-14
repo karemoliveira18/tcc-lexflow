@@ -1,5 +1,6 @@
 import { prisma } from "../db.js";
 import { sendError } from "../utils/http.js";
+import { parseDateOnly, serializeDateOnly } from "../utils/date.js";
 
 const getAllProcessos = async (req, res) => {
   try {
@@ -21,8 +22,14 @@ const getAllProcessos = async (req, res) => {
     const areaFilter = typeof area === "string" ? area.trim() : "";
     const prazoFilter = {};
 
-    if (prazoDe) prazoFilter.gte = new Date(prazoDe);
-    if (prazoAte) prazoFilter.lte = new Date(prazoAte);
+    if (prazoDe) {
+      const parsedPrazoDe = parseDateOnly(prazoDe);
+      if (parsedPrazoDe) prazoFilter.gte = parsedPrazoDe;
+    }
+    if (prazoAte) {
+      const parsedPrazoAte = parseDateOnly(prazoAte);
+      if (parsedPrazoAte) prazoFilter.lte = parsedPrazoAte;
+    }
 
     const where = {
       userId,
@@ -50,7 +57,10 @@ const getAllProcessos = async (req, res) => {
     ]);
 
     return res.json({
-      data: processos,
+      data: processos.map((processo) => ({
+        ...processo,
+        prazo: serializeDateOnly(processo.prazo),
+      })),
       pagination: {
         page: pageNumber,
         limit: limitNumber,
@@ -107,7 +117,10 @@ const getProcessoById = async (req, res) => {
       });
     }
 
-    return res.json(processo);
+    return res.json({
+      ...processo,
+      prazo: serializeDateOnly(processo.prazo),
+    });
   } catch (error) {
     console.error("Get processo by id error:", error);
     return sendError(res, {
@@ -130,6 +143,16 @@ const createProcesso = async (req, res) => {
         status: 401,
         code: "AUTH_REQUIRED",
         message: "Token de autenticação obrigatório",
+        details: [],
+      });
+    }
+
+    const parsedPrazo = parseDateOnly(prazo);
+    if (!parsedPrazo) {
+      return sendError(res, {
+        status: 400,
+        code: "VALIDATION_ERROR",
+        message: "Prazo inválido. Use o formato YYYY-MM-DD",
         details: [],
       });
     }
@@ -160,7 +183,7 @@ const createProcesso = async (req, res) => {
       data: {
         titulo,
         area,
-        prazo: new Date(prazo),
+        prazo: parsedPrazo,
         status: status || "ativo",
         descricao,
         prioridade: prioridade || "normal",
@@ -174,7 +197,10 @@ const createProcesso = async (req, res) => {
       },
     });
 
-    return res.status(201).json(processo);
+    return res.status(201).json({
+      ...processo,
+      prazo: serializeDateOnly(processo.prazo),
+    });
   } catch (error) {
     console.error("Create processo error:", error);
     return sendError(res, {
@@ -199,7 +225,7 @@ const updateProcesso = async (req, res) => {
         details: [],
       });
     }
-    const { titulo, area, prazo, status, descricao, prioridade } = req.body;
+    const { titulo, area, prazo, status, descricao, prioridade, clienteId } = req.body;
 
     const processo = await prisma.processo.findFirst({
       where: { id, userId },
@@ -214,15 +240,41 @@ const updateProcesso = async (req, res) => {
       });
     }
 
+    if (clienteId !== undefined) {
+      const cliente = await prisma.cliente.findFirst({
+        where: { id: clienteId, userId },
+      });
+
+      if (!cliente) {
+        return sendError(res, {
+          status: 404,
+          code: "NOT_FOUND",
+          message: "Cliente não encontrado para este usuário",
+          details: [],
+        });
+      }
+    }
+
+    const nextPrazo = prazo !== undefined ? parseDateOnly(prazo) : undefined;
+    if (prazo !== undefined && !nextPrazo) {
+      return sendError(res, {
+        status: 400,
+        code: "VALIDATION_ERROR",
+        message: "Prazo inválido. Use o formato YYYY-MM-DD",
+        details: [],
+      });
+    }
+
     const processoUpdated = await prisma.processo.update({
       where: { id },
       data: {
-        titulo: titulo || undefined,
-        area: area || undefined,
-        prazo: prazo ? new Date(prazo) : undefined,
-        status: status || undefined,
-        descricao: descricao || undefined,
-        prioridade: prioridade || undefined,
+        titulo: titulo !== undefined ? titulo : undefined,
+        area: area !== undefined ? area : undefined,
+        prazo: nextPrazo ?? undefined,
+        status: status !== undefined ? status : undefined,
+        descricao: descricao !== undefined ? descricao : undefined,
+        prioridade: prioridade !== undefined ? prioridade : undefined,
+        clienteId: clienteId !== undefined ? clienteId : undefined,
       },
       include: {
         cliente: {
@@ -231,7 +283,10 @@ const updateProcesso = async (req, res) => {
       },
     });
 
-    return res.json(processoUpdated);
+    return res.json({
+      ...processoUpdated,
+      prazo: serializeDateOnly(processoUpdated.prazo),
+    });
   } catch (error) {
     console.error("Update processo error:", error);
     return sendError(res, {
