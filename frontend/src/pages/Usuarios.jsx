@@ -107,40 +107,40 @@ export default function Usuarios() {
   };
 
   if (loading) {
-    return <div className="content-area"><p>Carregando usuários...</p></div>;
+    return <div className="content-area usuarios-page"><p>Carregando usuários...</p></div>;
   }
 
   return (
-    <div className="content-area">
+    <div className="content-area usuarios-page">
       <div className="page-header">
         <h1>Usuários</h1>
       </div>
 
-      <div style={{ display: 'grid', gap: 20 }}>
-        <form onSubmit={handleSubmit} style={{ background: '#fff', borderRadius: 12, padding: 16, display: 'grid', gap: 12 }}>
-          <h2 style={{ margin: 0 }}>{editingId ? 'Editar usuário' : 'Novo usuário'}</h2>
+      <div className="usuarios-layout">
+        <form onSubmit={handleSubmit} className="usuarios-card usuarios-form">
+          <h2>{editingId ? 'Editar usuário' : 'Novo usuário'}</h2>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: 12 }}>
-            <label style={{ display: 'grid', gap: 6 }}>
+          <div className="usuarios-form-grid">
+            <label>
               <span>Nome</span>
-              <input name="nome" value={form.nome} onChange={handleChange} required style={{ padding: 10, borderRadius: 8, border: '1px solid #cbd5e1' }} />
+              <input name="nome" value={form.nome} onChange={handleChange} required />
             </label>
 
-            <label style={{ display: 'grid', gap: 6 }}>
+            <label>
               <span>Email</span>
-              <input name="email" type="email" value={form.email} onChange={handleChange} required style={{ padding: 10, borderRadius: 8, border: '1px solid #cbd5e1' }} />
+              <input name="email" type="email" value={form.email} onChange={handleChange} required />
             </label>
 
-            <label style={{ display: 'grid', gap: 6 }}>
+            <label>
               <span>Perfil</span>
-              <select name="perfil" value={form.perfil} onChange={handleChange} style={{ padding: 10, borderRadius: 8, border: '1px solid #cbd5e1' }}>
+              <select name="perfil" value={form.perfil} onChange={handleChange}>
                 <option value="usuario">Usuário</option>
                 <option value="advogado">Advogado</option>
                 <option value="admin">Admin</option>
               </select>
             </label>
 
-            <label style={{ display: 'grid', gap: 6 }}>
+            <label>
               <span>{editingId ? 'Nova senha (opcional)' : 'Senha'}</span>
               <input
                 name="password"
@@ -149,60 +149,53 @@ export default function Usuarios() {
                 onChange={handleChange}
                 required={!editingId}
                 minLength={8}
-                style={{ padding: 10, borderRadius: 8, border: '1px solid #cbd5e1' }}
               />
             </label>
           </div>
 
-          {error && <div style={{ color: '#b91c1c', background: '#fee2e2', borderRadius: 8, padding: '10px 12px' }}>{error}</div>}
-          {successMessage && <div style={{ color: '#166534', background: '#dcfce7', borderRadius: 8, padding: '10px 12px' }}>{successMessage}</div>}
+          {error && <div className="usuarios-message usuarios-message-error">{error}</div>}
+          {successMessage && <div className="usuarios-message usuarios-message-success">{successMessage}</div>}
 
-          <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-            <button type="submit" disabled={submitting} style={{ padding: '10px 16px', borderRadius: 8, background: '#2563eb', color: '#fff', border: 'none', cursor: 'pointer' }}>
+          <div className="usuarios-actions">
+            <button type="submit" disabled={submitting} className="usuarios-save-button">
               {submitting ? 'Salvando...' : editingId ? 'Atualizar usuário' : 'Salvar usuário'}
             </button>
             {editingId && (
-              <button type="button" onClick={resetForm} style={{ padding: '10px 16px', borderRadius: 8, background: '#e2e8f0', color: '#0f172a', border: 'none', cursor: 'pointer' }}>
+              <button type="button" onClick={resetForm} className="usuarios-cancel-button">
                 Cancelar
               </button>
             )}
           </div>
         </form>
 
-        <div style={{ background: '#fff', borderRadius: 12, padding: 16 }}>
-          <h2 style={{ marginTop: 0 }}>Lista de usuários</h2>
-          <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <div className="usuarios-card usuarios-list-card">
+          <h2>Lista de usuários</h2>
+          <div className="usuarios-table-wrap">
+            <table className="usuarios-table">
             <thead>
               <tr>
-                <th style={{ textAlign: 'left', padding: '10px 8px' }}>Nome</th>
-                <th style={{ textAlign: 'left', padding: '10px 8px' }}>Email</th>
-                <th style={{ textAlign: 'left', padding: '10px 8px' }}>Perfil</th>
-                <th style={{ textAlign: 'left', padding: '10px 8px' }}>Status</th>
-                <th style={{ textAlign: 'left', padding: '10px 8px' }}>Ações</th>
+                <th>Nome</th>
+                <th>Email</th>
+                <th>Perfil</th>
+                <th>Status</th>
+                <th>Ações</th>
               </tr>
             </thead>
             <tbody>
               {usuarios.map((usuario) => (
                 <tr key={usuario.id}>
-                  <td style={{ padding: '10px 8px' }}>{usuario.nome}</td>
-                  <td style={{ padding: '10px 8px' }}>{usuario.email}</td>
-                  <td style={{ padding: '10px 8px' }}>{usuario.perfil}</td>
-                  <td style={{ padding: '10px 8px' }}>{usuario.ativo ? 'Ativo' : 'Inativo'}</td>
-                  <td style={{ padding: '10px 8px', display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-                    <button type="button" onClick={() => handleEdit(usuario)} style={{ padding: '8px 10px', borderRadius: 8, border: 'none', background: '#dbeafe', color: '#1d4ed8', cursor: 'pointer' }}>
+                  <td>{usuario.nome}</td>
+                  <td className="usuarios-secondary-text">{usuario.email}</td>
+                  <td className="usuarios-secondary-text usuarios-profile-cell">{usuario.perfil}</td>
+                  <td className={usuario.ativo ? 'usuarios-status-active' : 'usuarios-secondary-text'}>{usuario.ativo ? 'Ativo' : 'Inativo'}</td>
+                  <td className="usuarios-row-actions">
+                    <button type="button" onClick={() => handleEdit(usuario)} className="usuarios-edit-button">
                       Editar
                     </button>
                     <button
                       type="button"
                       onClick={() => handleToggleStatus(usuario)}
-                      style={{
-                        padding: '8px 10px',
-                        borderRadius: 8,
-                        border: 'none',
-                        background: usuario.ativo ? '#fee2e2' : '#dcfce7',
-                        color: usuario.ativo ? '#b91c1c' : '#166534',
-                        cursor: 'pointer',
-                      }}
+                      className={usuario.ativo ? 'usuarios-status-button usuarios-status-button-inactive' : 'usuarios-status-button usuarios-status-button-active'}
                     >
                       {usuario.ativo ? 'Inativar' : 'Ativar'}
                     </button>
@@ -210,7 +203,8 @@ export default function Usuarios() {
                 </tr>
               ))}
             </tbody>
-          </table>
+            </table>
+          </div>
         </div>
       </div>
     </div>

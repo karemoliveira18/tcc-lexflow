@@ -24,7 +24,12 @@ async function main() {
   });
 
   const cliente = await prisma.cliente.upsert({
-    where: { cpfCnpj: "00000000000" },
+    where: {
+      userId_cpfCnpj: {
+        userId: user.id,
+        cpfCnpj: "00000000000",
+      },
+    },
     update: {
       nome: "Cliente Exemplo",
       email: "cliente@lexflow.com",

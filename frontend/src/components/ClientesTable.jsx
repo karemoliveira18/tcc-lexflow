@@ -15,7 +15,7 @@ export default function ClientesTable({ refreshTrigger, onEdit, onDelete }) {
     try {
       setLoading(true);
       const response = await clientesAPI.getAllClientes();
-      setClientes(response.data);
+      setClientes(response.data?.data || []);
     } catch (err) {
       setError('Erro ao carregar clientes');
     } finally {

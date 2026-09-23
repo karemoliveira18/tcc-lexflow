@@ -8,7 +8,7 @@ const Header = ({ onMenuToggle, userName = "Usuário", onLogout }) => {
       <div className="header-content">
         <div className="header-left">
           <h1 className="header-title">Painel de Controle</h1>
-          <p className="header-subtitle">Gestão Jurídica Inteligente</p>
+          <p className="header-subtitle">GESTÃO JURÍDICA INTELIGENTE</p>
         </div>
 
         <div className="header-actions">
@@ -23,7 +23,7 @@ const Header = ({ onMenuToggle, userName = "Usuário", onLogout }) => {
 
           {/* Campo de busca */}
           <div className="relative hidden md:block">
-            <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+            <Search size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2" style={{ color: '#d4af37' }} />
             <input
               type="text"
               placeholder="Buscar processos, clientes..."

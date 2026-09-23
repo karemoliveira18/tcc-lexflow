@@ -1,7 +1,7 @@
 export default function Alert({ type = "success", title, message, onClose }) {
   const colorStyles = {
-    success: "border-emerald-200 bg-emerald-50 text-emerald-800",
-    error: "border-rose-200 bg-rose-50 text-rose-800",
+    success: "border border-[#d4af37]/25 bg-[#111111] text-[#f5f1e8]",
+    error: "border border-[#ffb4b4]/25 bg-[#181818] text-[#ffe1e1]",
   };
 
   return (
@@ -17,7 +17,8 @@ export default function Alert({ type = "success", title, message, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="rounded-full bg-white/90 px-2.5 py-1 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-100"
+            className="rounded-full px-2.5 py-1 text-sm font-semibold shadow-sm transition"
+            style={{ background: '#0a0a0a', color: '#d4af37' }}
           >
             Fechar
           </button>

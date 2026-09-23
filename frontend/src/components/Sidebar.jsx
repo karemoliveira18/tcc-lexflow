@@ -91,10 +91,10 @@ const Sidebar = ({ activeSection, onSectionChange, open = false, onClose, user }
       {/* Footer da Sidebar */}
       <div className="sidebar-footer">
         <div className="flex items-center gap-2 mb-3">
-          <Zap size={16} className="text-slate-400" />
-          <span className="text-sm font-medium text-slate-200">Premium</span>
+          <Zap size={16} style={{ color: '#d4af37' }} />
+          <span className="text-sm font-medium" style={{ color: '#f5f1e8' }}>Premium</span>
         </div>
-        <p className="text-xs text-slate-400 leading-relaxed mb-3">
+        <p className="text-xs leading-relaxed mb-3" style={{ color: '#a6a6a6' }}>
           Acesso completo a todas as funcionalidades avançadas da plataforma.
         </p>
         <div className="footer-badge">

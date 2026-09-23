@@ -12,13 +12,17 @@ const initialFormData = {
   clienteId: "",
 };
 
-export default function ProcessoForm({ processo, clientes, onClose, onSave }) {
+export default function ProcessoForm({ processo, clientes, clientesLoading, clientesError, onClose, onSave }) {
   const [formData, setFormData] = useState(initialFormData);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [clienteBusca, setClienteBusca] = useState("");
+  const [clienteSelecionado, setClienteSelecionado] = useState(null);
+  const [mostrarSugestoes, setMostrarSugestoes] = useState(false);
 
   useEffect(() => {
     if (processo) {
+      const cliente = clientes.find((item) => item.id === processo.clienteId) || processo.cliente || null;
       setFormData({
         titulo: processo.titulo,
         area: processo.area,
@@ -28,11 +32,15 @@ export default function ProcessoForm({ processo, clientes, onClose, onSave }) {
         prioridade: processo.prioridade,
         clienteId: processo.clienteId,
       });
+      setClienteSelecionado(cliente);
+      setClienteBusca(cliente?.nome || "");
     } else {
       setFormData(initialFormData);
       setError("");
+      setClienteSelecionado(null);
+      setClienteBusca("");
     }
-  }, [processo]);
+  }, [processo, clientes]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -64,36 +72,62 @@ export default function ProcessoForm({ processo, clientes, onClose, onSave }) {
     }));
   };
 
+  const clientesFiltrados = clientes.filter((cliente) =>
+    cliente.nome.toLocaleLowerCase().includes(clienteBusca.trim().toLocaleLowerCase()),
+  );
+
+  const handleClienteBuscaChange = (event) => {
+    setClienteBusca(event.target.value);
+    setClienteSelecionado(null);
+    setFormData((prev) => ({ ...prev, clienteId: "" }));
+    setMostrarSugestoes(true);
+  };
+
+  const handleClienteSelect = (cliente) => {
+    setClienteSelecionado(cliente);
+    setClienteBusca(cliente.nome);
+    setFormData((prev) => ({ ...prev, clienteId: cliente.id }));
+    setMostrarSugestoes(false);
+  };
+
+  const handleClienteClear = () => {
+    setClienteSelecionado(null);
+    setClienteBusca("");
+    setFormData((prev) => ({ ...prev, clienteId: "" }));
+    setMostrarSugestoes(false);
+  };
+
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
-      <div className="w-full max-w-3xl rounded-3xl bg-white p-6 shadow-2xl ring-1 ring-slate-200">
+    <div className="processo-modal-backdrop fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="processo-modal w-full rounded-3xl p-6 shadow-2xl">
         <div className="mb-6 flex items-center justify-between gap-4">
           <div>
-            <h2 className="text-2xl font-semibold text-slate-900">
+            <h2 className="text-2xl font-semibold" style={{ color: '#f5f1e8' }}>
               {processo ? "Editar Processo" : "Novo Processo"}
             </h2>
-            <p className="mt-1 text-sm text-slate-600">
+            <p className="mt-1 text-sm" style={{ color: '#a6a6a6' }}>
               Preencha os dados do processo para sincronizar com o backend.
             </p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-slate-200 bg-white text-slate-600 transition hover:bg-slate-50"
+            className="inline-flex h-11 w-11 items-center justify-center rounded-full border transition"
+            style={{ borderColor: 'rgba(212, 175, 55, 0.25)', background: '#0a0a0a', color: '#f5f1e8' }}
           >
             <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+        <form onSubmit={handleSubmit} className="processo-form space-y-5">
           {error && (
             <div className="rounded-3xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
               {error}
             </div>
           )}
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="space-y-2 text-sm font-medium text-slate-700">
+          <div className="processo-form-grid processo-form-grid-primary">
+            <label className="space-y-2 text-sm font-medium" style={{ color: '#f5f1e8' }}>
               Título *
               <input
                 type="text"
@@ -101,11 +135,12 @@ export default function ProcessoForm({ processo, clientes, onClose, onSave }) {
                 value={formData.titulo}
                 onChange={handleChange}
                 required
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                className="w-full rounded-2xl px-4 py-3 text-sm outline-none transition"
+                style={{ border: '1px solid rgba(212, 175, 55, 0.25)', background: '#0a0a0a', color: '#f5f1e8' }}
               />
             </label>
 
-            <label className="space-y-2 text-sm font-medium text-slate-700">
+            <label className="space-y-2 text-sm font-medium" style={{ color: '#f5f1e8' }}>
               Área *
               <input
                 type="text"
@@ -113,31 +148,62 @@ export default function ProcessoForm({ processo, clientes, onClose, onSave }) {
                 value={formData.area}
                 onChange={handleChange}
                 required
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                className="w-full rounded-2xl px-4 py-3 text-sm outline-none transition"
+                style={{ border: '1px solid rgba(212, 175, 55, 0.25)', background: '#0a0a0a', color: '#f5f1e8' }}
               />
             </label>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="space-y-2 text-sm font-medium text-slate-700">
+          <div className="processo-form-grid processo-form-grid-secondary">
+            <label className="processo-client-field space-y-2 text-sm font-medium" style={{ color: '#f5f1e8' }}>
               Cliente *
-              <select
-                name="clienteId"
-                value={formData.clienteId}
-                onChange={handleChange}
-                required
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
-              >
-                <option value="">Selecione um cliente</option>
-                {clientes.map((cliente) => (
-                  <option key={cliente.id} value={cliente.id}>
-                    {cliente.nome}
-                  </option>
-                ))}
-              </select>
+              <div className="processo-client-autocomplete">
+                <div className="processo-client-input-wrap">
+                  <input
+                    type="text"
+                    value={clienteBusca}
+                    onChange={handleClienteBuscaChange}
+                    onFocus={() => setMostrarSugestoes(Boolean(clienteBusca.trim()) && !clienteSelecionado)}
+                    placeholder={clientesLoading ? "Carregando clientes..." : "Digite o nome do cliente..."}
+                    disabled={clientesLoading || Boolean(clientesError)}
+                    required={!formData.clienteId}
+                    autoComplete="off"
+                  />
+                  {clienteSelecionado && (
+                    <button
+                      type="button"
+                      className="processo-client-clear"
+                      onClick={handleClienteClear}
+                      aria-label="Remover cliente selecionado"
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                </div>
+                {mostrarSugestoes && !clientesLoading && !clientesError && (
+                  <div className="processo-client-suggestions" role="listbox">
+                    {clientesFiltrados.length > 0 ? clientesFiltrados.map((cliente) => (
+                      <button
+                        key={cliente.id}
+                        type="button"
+                        className="processo-client-suggestion"
+                        onMouseDown={(event) => event.preventDefault()}
+                        onClick={() => handleClienteSelect(cliente)}
+                      >
+                        <strong>{cliente.nome}</strong>
+                        {cliente.cpfCnpj && <span>CPF/CNPJ: {cliente.cpfCnpj}</span>}
+                      </button>
+                    )) : (
+                      <p className="processo-client-empty">Cliente não encontrado.</p>
+                    )}
+                  </div>
+                )}
+                {!clientesLoading && clientesError && <p className="processo-client-feedback">{clientesError}</p>}
+                {!clientesLoading && !clientesError && clientes.length === 0 && <p className="processo-client-feedback">Nenhum cliente cadastrado.</p>}
+              </div>
             </label>
 
-            <label className="space-y-2 text-sm font-medium text-slate-700">
+            <label className="space-y-2 text-sm font-medium" style={{ color: '#f5f1e8' }}>
               Prazo *
               <input
                 type="date"
@@ -145,19 +211,21 @@ export default function ProcessoForm({ processo, clientes, onClose, onSave }) {
                 value={formData.prazo}
                 onChange={handleChange}
                 required
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                className="w-full rounded-2xl px-4 py-3 text-sm outline-none transition"
+                style={{ border: '1px solid rgba(212, 175, 55, 0.25)', background: '#0a0a0a', color: '#f5f1e8' }}
               />
             </label>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-3">
-            <label className="space-y-2 text-sm font-medium text-slate-700">
+          <div className="processo-form-grid processo-form-grid-options">
+            <label className="space-y-2 text-sm font-medium" style={{ color: '#f5f1e8' }}>
               Prioridade
               <select
                 name="prioridade"
                 value={formData.prioridade}
                 onChange={handleChange}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                className="w-full rounded-2xl px-4 py-3 text-sm outline-none transition"
+                style={{ border: '1px solid rgba(212, 175, 55, 0.25)', background: '#0a0a0a', color: '#f5f1e8' }}
               >
                 <option value="baixa">Baixa</option>
                 <option value="normal">Normal</option>
@@ -165,13 +233,14 @@ export default function ProcessoForm({ processo, clientes, onClose, onSave }) {
               </select>
             </label>
 
-            <label className="space-y-2 text-sm font-medium text-slate-700">
+            <label className="space-y-2 text-sm font-medium" style={{ color: '#f5f1e8' }}>
               Status
               <select
                 name="status"
                 value={formData.status}
                 onChange={handleChange}
-                className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+                className="w-full rounded-2xl px-4 py-3 text-sm outline-none transition"
+                style={{ border: '1px solid rgba(212, 175, 55, 0.25)', background: '#0a0a0a', color: '#f5f1e8' }}
               >
                 <option value="ativo">Ativo</option>
                 <option value="aguardando">Aguardando</option>
@@ -181,29 +250,32 @@ export default function ProcessoForm({ processo, clientes, onClose, onSave }) {
             </label>
           </div>
 
-          <label className="space-y-2 text-sm font-medium text-slate-700">
+          <label className="processo-description-field space-y-2 text-sm font-medium" style={{ color: '#f5f1e8' }}>
             Descrição
             <textarea
               name="descricao"
               value={formData.descricao}
               onChange={handleChange}
               rows="4"
-              className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-slate-400 focus:ring-2 focus:ring-slate-100"
+              className="w-full rounded-2xl px-4 py-3 text-sm outline-none transition"
+              style={{ border: '1px solid rgba(212, 175, 55, 0.25)', background: '#0a0a0a', color: '#f5f1e8' }}
             />
           </label>
 
-          <div className="flex flex-col gap-3 border-t border-slate-200 pt-4 sm:flex-row sm:justify-end">
+          <div className="flex flex-col gap-3 border-t pt-4 sm:flex-row sm:justify-end" style={{ borderColor: 'rgba(212, 175, 55, 0.18)' }}>
             <button
               type="button"
               onClick={onClose}
-              className="rounded-2xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+              className="rounded-2xl border px-5 py-3 text-sm font-semibold transition"
+              style={{ borderColor: 'rgba(212, 175, 55, 0.35)', background: '#151515', color: '#f5f1e8' }}
             >
               Cancelar
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="rounded-2xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400"
+              className="rounded-2xl px-5 py-3 text-sm font-semibold transition disabled:cursor-not-allowed"
+              style={{ background: '#d4af37', color: '#050505' }}
             >
               {loading ? "Salvando..." : "Salvar"}
             </button>

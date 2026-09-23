@@ -30,7 +30,7 @@ const Processos = ({ showForm: externalShowForm = false, onShowFormChange }) => 
     try {
       setLoading(true);
       const response = await api.get('/processos');
-      setProcessos(response.data);
+      setProcessos(response.data?.data || []);
       setError(null);
     } catch (err) {
       setError('Erro ao carregar processos');
@@ -115,7 +115,7 @@ const Processos = ({ showForm: externalShowForm = false, onShowFormChange }) => 
     return (
       <div className="loading">
         <div className="spinner"></div>
-        <p className="mt-4 text-slate-400">Carregando processos...</p>
+        <p className="mt-4" style={{ color: '#a6a6a6' }}>Carregando processos...</p>
       </div>
     );
   }
@@ -131,8 +131,8 @@ const Processos = ({ showForm: externalShowForm = false, onShowFormChange }) => 
       {/* Métricas */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
         <div className="metric-card">
-          <div className="p-3 bg-slate-800 rounded-xl mb-4">
-            <CheckCircle2 size={24} className="text-blue-400" />
+          <div className="p-3 rounded-xl mb-4" style={{ background: '#111111' }}>
+            <CheckCircle2 size={24} style={{ color: '#d4af37' }} />
           </div>
           <div className="metric-value">{metrics.total}</div>
           <div className="metric-label">Total de Processos</div>
@@ -158,8 +158,8 @@ const Processos = ({ showForm: externalShowForm = false, onShowFormChange }) => 
         </div>
 
         <div className="metric-card">
-          <div className="p-3 bg-slate-800 rounded-xl mb-4">
-            <XCircle size={24} className="text-slate-400" />
+          <div className="p-3 rounded-xl mb-4" style={{ background: '#111111' }}>
+            <XCircle size={24} style={{ color: '#a6a6a6' }} />
           </div>
           <div className="metric-value">{metrics.inativo}</div>
           <div className="metric-label">Concluídos</div>
@@ -186,10 +186,10 @@ const Processos = ({ showForm: externalShowForm = false, onShowFormChange }) => 
           >
             <div className="flex justify-between items-center mb-6">
               <div>
-                <h3 className="text-xl font-semibold text-slate-100">
+                <h3 className="text-xl font-semibold" style={{ color: '#f5f1e8' }}>
                   {editingProcesso ? 'Editar Processo' : 'Novo Processo'}
                 </h3>
-                <p className="text-slate-400 text-sm mt-1">
+                <p className="text-sm mt-1" style={{ color: '#a6a6a6' }}>
                   {editingProcesso ? 'Atualize as informações do processo' : 'Adicione um novo processo ao sistema'}
                 </p>
               </div>
@@ -265,8 +265,8 @@ const Processos = ({ showForm: externalShowForm = false, onShowFormChange }) => 
       <div className="card">
         <div className="flex justify-between items-center mb-6">
           <div>
-            <h3 className="text-xl font-semibold text-slate-100">Processos Cadastrados</h3>
-            <p className="text-slate-400 text-sm mt-1">
+            <h3 className="text-xl font-semibold" style={{ color: '#f5f1e8' }}>Processos Cadastrados</h3>
+            <p className="text-sm mt-1" style={{ color: '#a6a6a6' }}>
               Gerencie todos os seus processos jurídicos
             </p>
           </div>

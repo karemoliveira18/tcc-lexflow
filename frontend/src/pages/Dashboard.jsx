@@ -263,11 +263,11 @@ export default function Dashboard() {
                 <Tooltip
                   contentStyle={{
                     background: "#121212",
-                    border: "1px solid rgba(148, 163, 184, 0.2)",
+                    border: "1px solid rgba(212, 175, 55, 0.2)",
                     borderRadius: "16px",
                     color: "#f8fafc",
                   }}
-                  cursor={{ fill: "rgba(56, 189, 248, 0.12)" }}
+                  cursor={{ fill: "rgba(212, 175, 55, 0.12)" }}
                 />
                 <Legend
                   wrapperStyle={{ color: "#cbd5e1", paddingTop: 12 }}

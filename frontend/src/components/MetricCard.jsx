@@ -8,9 +8,9 @@ const MetricCard = ({ title, value, description, icon: Icon, trend, trendValue }
           <Icon size={24} />
         </div>
         {trend && (
-          <div className={`flex items-center gap-1 text-xs font-medium ${
-            trend === 'up' ? 'text-green-400' : trend === 'down' ? 'text-red-400' : 'text-slate-400'
-          }`}>
+          <div className="flex items-center gap-1 text-xs font-medium" style={{
+            color: trend === 'up' ? '#7de1a9' : trend === 'down' ? '#ff9d9d' : '#a6a6a6'
+          }}>
             <span>{trend === 'up' ? '↗' : trend === 'down' ? '↘' : '→'}</span>
             <span>{trendValue}</span>
           </div>

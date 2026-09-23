@@ -15,6 +15,8 @@ export default function Processos() {
   const [showForm, setShowForm] = useState(false);
   const [editingProcesso, setEditingProcesso] = useState(null);
   const [clientes, setClientes] = useState([]);
+  const [clientesLoading, setClientesLoading] = useState(true);
+  const [clientesError, setClientesError] = useState("");
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   useEffect(() => {
@@ -33,12 +35,18 @@ export default function Processos() {
 
   const fetchClientes = async () => {
     try {
+      setClientesLoading(true);
+      setClientesError("");
       const response = await clientesAPI.getAllClientes();
-      setClientes(response.data || []);
+      setClientes(response.data?.data || []);
     } catch (err) {
       console.error("Erro ao carregar clientes:", err);
+      setClientes([]);
+      setClientesError("Não foi possível carregar os clientes.");
       setMessage("Não foi possível carregar os clientes.");
       setMessageType("error");
+    } finally {
+      setClientesLoading(false);
     }
   };
 
@@ -48,7 +56,7 @@ export default function Processos() {
 
     try {
       const response = await processosAPI.getAllProcessos();
-      setProcessos(response.data || []);
+      setProcessos(response.data?.data || []);
     } catch (err) {
       console.error("Erro ao carregar processos:", err);
       setError(
@@ -70,13 +78,16 @@ export default function Processos() {
     setError("");
     try {
       const base = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
-      const res = await fetch(`${base}/processos`);
+      const token = localStorage.getItem("token");
+      const res = await fetch(`${base}/processos`, {
+        headers: token ? { Authorization: `Bearer ${token}` } : {},
+      });
       if (!res.ok) throw new Error("Erro na resposta");
       const data = await res.json();
-      setProcessos(data || []);
+      setProcessos(data?.data || []);
     } catch (err) {
       console.error("fetch() error:", err);
-      setError("Não foi possível carregar processos via fetch()");
+      setError("Não foi possível carregar os processos.");
     } finally {
       setLoading(false);
     }
@@ -110,27 +121,19 @@ export default function Processos() {
     <div className="processos-page px-4 py-6 sm:px-6 lg:px-8">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between mb-6">
         <div>
-          <h1 className="text-3xl font-semibold text-slate-900">Processos</h1>
-          <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-600">
-            Visualize a lista de processos diretamente da API e do banco de
-            dados.
+          <h1 className="text-3xl font-semibold" style={{ color: '#f5f1e8' }}>Processos</h1>
+          <p className="mt-2 max-w-2xl text-sm leading-6" style={{ color: '#a6a6a6' }}>
+            Gerencie os processos jurídicos cadastrados no sistema.
           </p>
         </div>
 
         <button
           type="button"
           onClick={handleNewProcesso}
-          className="inline-flex items-center justify-center rounded-full bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400"
+          className="btn btn-primary"
         >
           <Plus className="mr-2" size={18} />
           Novo Processo
-        </button>
-        <button
-          type="button"
-          onClick={fetchProcessosWithFetch}
-          className="ml-3 inline-flex items-center justify-center rounded-full bg-slate-700 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-600 focus:outline-none"
-        >
-          Carregar via fetch()
         </button>
       </div>
 
@@ -157,12 +160,13 @@ export default function Processos() {
         <ProcessoForm
           processo={editingProcesso}
           clientes={clientes}
+          clientesLoading={clientesLoading}
+          clientesError={clientesError}
           onClose={handleCloseForm}
           onSave={handleSaveProcesso}
         />
       )}
 
-      {/* Componente demonstrativo que usa fetch() puro para obter/processos da API */}
       <ProcessosFetch />
     </div>
   );

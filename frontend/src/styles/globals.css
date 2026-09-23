@@ -66,24 +66,27 @@ body {
 
 .btn-primary {
   background: #d4af37;
-  color: #080808;
+  color: #050505;
   padding: 12px 20px;
+  box-shadow: 0 10px 24px rgba(212, 175, 55, 0.14);
 }
 
 .btn-primary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 10px 22px rgba(212, 175, 55, 0.22);
+  box-shadow: 0 12px 28px rgba(212, 175, 55, 0.22);
+  background: #e8c766;
 }
 
 .btn-secondary {
-  background: #1c1c1c;
-  color: #f3d27a;
+  background: #111111;
+  color: #e8c766;
   padding: 12px 20px;
+  border: 1px solid rgba(212, 175, 55, 0.24);
 }
 
 .btn-ghost {
   background: transparent;
-  color: #ffffff;
+  color: #f5f1e8;
   padding: 10px 14px;
 }
 

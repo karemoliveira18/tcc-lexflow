@@ -18,10 +18,10 @@ export default function ProtectedRoute({ isAuthenticated, user, isInitializing, 
         <div className="page-header">
           <h1>Acesso negado</h1>
         </div>
-        <div style={{ background: 'white', padding: '20px', borderRadius: '12px' }}>
-          <p>Você não tem permissão para acessar esta área.</p>
+        <div style={{ background: '#111111', padding: '20px', borderRadius: '12px', border: '1px solid rgba(212, 175, 55, 0.25)' }}>
+          <p style={{ color: '#f5f1e8' }}>Você não tem permissão para acessar esta área.</p>
           <p style={{ marginTop: '12px' }}>
-            <a href="/dashboard" style={{ color: '#2563eb' }}>Voltar ao dashboard</a>
+            <a href="/dashboard" style={{ color: '#d4af37' }}>Voltar ao dashboard</a>
           </p>
         </div>
       </div>
