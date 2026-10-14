@@ -57,8 +57,13 @@ export default function ProcessoForm({ processo, clientes, clientesLoading, clie
       }
       onClose?.();
     } catch (err) {
-      setError(err.response?.data?.error || "Erro ao salvar processo");
-      onSave?.("Não foi possível salvar o processo.", "error");
+      const apiError = err.response?.data?.error;
+      const errorMessage =
+        (typeof apiError === "string" ? apiError : apiError?.message)
+        || err.response?.data?.message
+        || "Erro ao salvar processo";
+      setError(errorMessage);
+      onSave?.(errorMessage, "error");
     } finally {
       setLoading(false);
     }
@@ -121,7 +126,7 @@ export default function ProcessoForm({ processo, clientes, clientesLoading, clie
 
         <form onSubmit={handleSubmit} className="processo-form space-y-5">
           {error && (
-            <div className="rounded-3xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+            <div className="processo-form-error" role="alert">
               {error}
             </div>
           )}

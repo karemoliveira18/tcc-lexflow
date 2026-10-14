@@ -1,6 +1,18 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+const getRuntimeEnv = () => {
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    return import.meta.env;
+  }
+
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env;
+  }
+
+  return {};
+};
+
+const API_BASE_URL = getRuntimeEnv().VITE_API_BASE_URL || 'http://localhost:5000/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

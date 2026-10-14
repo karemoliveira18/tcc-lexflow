@@ -1,12 +1,20 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import ClientesTable from '../components/ClientesTable';
 import ClienteForm from '../components/ClienteForm';
+import Alert from '../components/Alert';
 import { Plus } from 'lucide-react';
 
 export default function Clientes() {
   const [showForm, setShowForm] = useState(false);
   const [editingCliente, setEditingCliente] = useState(null);
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [message, setMessage] = useState('');
+
+  useEffect(() => {
+    if (!message) return undefined;
+    const timeoutId = setTimeout(() => setMessage(''), 5000);
+    return () => clearTimeout(timeoutId);
+  }, [message]);
 
   const handleNewCliente = () => {
     setEditingCliente(null);
@@ -23,8 +31,9 @@ export default function Clientes() {
     setEditingCliente(null);
   };
 
-  const handleSaveCliente = () => {
+  const handleSaveCliente = (messageText) => {
     setRefreshTrigger(prev => prev + 1);
+    if (messageText) setMessage(messageText);
   };
 
   return (
@@ -36,6 +45,8 @@ export default function Clientes() {
           Novo Cliente
         </button>
       </div>
+
+      {message && <Alert message={message} onClose={() => setMessage('')} />}
 
       <ClientesTable
         refreshTrigger={refreshTrigger}

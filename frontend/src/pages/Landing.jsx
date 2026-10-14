@@ -77,7 +77,6 @@ export default function Landing({ isAuthenticated }) {
       </section>
 
       <section id="visao" className="landing-cta"><Logo size="md" /><div><span className="landing-eyebrow">MAIS CLAREZA. MAIS CONTROLE.</span><h2>Seu escritório merece uma gestão <em>mais inteligente.</em></h2><p>Tenha uma visão clara dos seus clientes, processos e prazos.</p></div><Link to="/login" className="landing-button landing-button-primary">Acessar o LexFlow <ArrowRight size={17} /></Link></section>
-      <footer className="landing-footer"><Logo compact size="sm" /><span>LEXFLOW · GESTÃO JURÍDICA INTELIGENTE</span><span>© 2026 LexFlow</span></footer>
     </main>
   );
 }

@@ -34,10 +34,15 @@ export default function ClienteForm({ cliente, onClose, onSave }) {
       } else {
         await clientesAPI.createCliente(formData);
       }
-      onSave?.();
+      onSave?.(cliente ? 'Cliente atualizado com sucesso.' : 'Cliente cadastrado com sucesso.');
       onClose?.();
     } catch (err) {
-      setError(err.response?.data?.error || 'Erro ao salvar cliente');
+      const apiError = err.response?.data?.error;
+      setError(
+        (typeof apiError === 'string' ? apiError : apiError?.message)
+          || err.response?.data?.message
+          || 'Erro ao salvar cliente',
+      );
     } finally {
       setLoading(false);
     }
@@ -62,11 +67,12 @@ export default function ClienteForm({ cliente, onClose, onSave }) {
         </div>
 
         <form onSubmit={handleSubmit}>
-          {error && <div className="error-message">{error}</div>}
+          {error && <div className="error-message" role="alert">{error}</div>}
 
           <div className="form-group">
-            <label>Nome *</label>
+            <label htmlFor="cliente-nome">Nome *</label>
             <input
+              id="cliente-nome"
               type="text"
               name="nome"
               value={formData.nome}
@@ -77,8 +83,9 @@ export default function ClienteForm({ cliente, onClose, onSave }) {
 
           <div className="form-row">
             <div className="form-group">
-              <label>CPF/CNPJ *</label>
+              <label htmlFor="cliente-cpfCnpj">CPF/CNPJ *</label>
               <input
+                id="cliente-cpfCnpj"
                 type="text"
                 name="cpfCnpj"
                 value={formData.cpfCnpj}
@@ -88,8 +95,9 @@ export default function ClienteForm({ cliente, onClose, onSave }) {
             </div>
 
             <div className="form-group">
-              <label>Email</label>
+              <label htmlFor="cliente-email">Email</label>
               <input
+                id="cliente-email"
                 type="email"
                 name="email"
                 value={formData.email}
@@ -100,8 +108,9 @@ export default function ClienteForm({ cliente, onClose, onSave }) {
 
           <div className="form-row">
             <div className="form-group">
-              <label>Telefone</label>
+              <label htmlFor="cliente-telefone">Telefone</label>
               <input
+                id="cliente-telefone"
                 type="tel"
                 name="telefone"
                 value={formData.telefone}
@@ -110,8 +119,9 @@ export default function ClienteForm({ cliente, onClose, onSave }) {
             </div>
 
             <div className="form-group">
-              <label>CEP</label>
+              <label htmlFor="cliente-cep">CEP</label>
               <input
+                id="cliente-cep"
                 type="text"
                 name="cep"
                 value={formData.cep}
@@ -121,8 +131,9 @@ export default function ClienteForm({ cliente, onClose, onSave }) {
           </div>
 
           <div className="form-group">
-            <label>Endereço</label>
+            <label htmlFor="cliente-endereco">Endereço</label>
             <input
+              id="cliente-endereco"
               type="text"
               name="endereco"
               value={formData.endereco}
@@ -132,8 +143,9 @@ export default function ClienteForm({ cliente, onClose, onSave }) {
 
           <div className="form-row">
             <div className="form-group">
-              <label>Cidade</label>
+              <label htmlFor="cliente-cidade">Cidade</label>
               <input
+                id="cliente-cidade"
                 type="text"
                 name="cidade"
                 value={formData.cidade}
@@ -142,8 +154,9 @@ export default function ClienteForm({ cliente, onClose, onSave }) {
             </div>
 
             <div className="form-group">
-              <label>Estado</label>
+              <label htmlFor="cliente-estado">Estado</label>
               <input
+                id="cliente-estado"
                 type="text"
                 name="estado"
                 value={formData.estado}
@@ -153,8 +166,9 @@ export default function ClienteForm({ cliente, onClose, onSave }) {
           </div>
 
           <div className="form-group">
-            <label>Observações</label>
+            <label htmlFor="cliente-observacoes">Observações</label>
             <textarea
+              id="cliente-observacoes"
               name="observacoes"
               value={formData.observacoes}
               onChange={handleChange}

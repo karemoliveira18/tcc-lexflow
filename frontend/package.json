@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "vite",
     "build": "vite build",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "jest --runInBand"
   },
   "dependencies": {
     "axios": "^1.15.2",
@@ -19,9 +20,18 @@
     "util-deprecate": "^1.0.2"
   },
   "devDependencies": {
+    "@babel/core": "^8.0.7",
+    "@babel/preset-env": "^8.0.7",
+    "@babel/preset-react": "^8.0.1",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
     "@vitejs/plugin-react": "^3.1.0",
     "autoprefixer": "^10.4.19",
+    "babel-jest": "^30.5.2",
+    "identity-obj-proxy": "^3.0.0",
     "is-extglob": "^2.1.1",
+    "jest": "^30.5.2",
+    "jest-environment-jsdom": "^30.5.2",
     "postcss": "^8.4.35",
     "tailwindcss": "^3.4.5",
     "vite": "^4.2.0"

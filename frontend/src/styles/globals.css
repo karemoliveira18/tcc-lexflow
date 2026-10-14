@@ -8,8 +8,8 @@
 
 body {
   font-family: "Inter", "Segoe UI", sans-serif;
-  background: #080808;
-  color: #f5f1e7;
+  background: #090909;
+  color: #ffffff;
 }
 
 /* Layout */
@@ -58,17 +58,18 @@ body {
   justify-content: center;
   gap: 8px;
   border: none;
-  border-radius: 10px;
+  border-radius: 1rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.3s ease;
 }
 
 .btn-primary {
-  background: #d4af37;
+  background: linear-gradient(135deg, #d4af37 0%, #e8c766 100%);
   color: #050505;
   padding: 12px 20px;
   box-shadow: 0 10px 24px rgba(212, 175, 55, 0.14);
+  border-radius: 0.75rem;
 }
 
 .btn-primary:hover {
@@ -82,12 +83,14 @@ body {
   color: #e8c766;
   padding: 12px 20px;
   border: 1px solid rgba(212, 175, 55, 0.24);
+  border-radius: 0.75rem;
 }
 
 .btn-ghost {
   background: transparent;
   color: #f5f1e8;
   padding: 10px 14px;
+  border-radius: 1rem;
 }
 
 .btn-sm {
@@ -152,20 +155,20 @@ body {
 }
 
 .error {
-  background: #ffebee;
-  color: #c33;
+  background: #171717;
+  color: #ffe1e1;
   padding: 16px;
   border-radius: 8px;
-  border-left: 4px solid #c33;
+  border-left: 4px solid #c75b5b;
   margin-bottom: 20px;
 }
 
 .error-message {
-  background: #ffebee;
-  color: #c33;
+  background: #171717;
+  color: #ffe1e1;
   padding: 12px;
   border-radius: 8px;
-  border-left: 4px solid #c33;
+  border-left: 4px solid #c75b5b;
   margin-bottom: 15px;
   font-size: 13px;
 }
@@ -210,7 +213,7 @@ tbody tr {
 }
 
 tbody tr:hover {
-  background: #f8f9fa;
+  background: rgba(212, 175, 55, 0.04);
 }
 
 td.titulo,
@@ -242,39 +245,39 @@ td.nome {
 }
 
 .status-ativo {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: rgba(125, 210, 150, 0.12);
+  color: #bde8c9;
 }
 
 .status-aguardando {
-  background: #fff3e0;
-  color: #e65100;
+  background: rgba(212, 175, 55, 0.12);
+  color: #e8c766;
 }
 
 .status-concluido,
 .status-concluído {
-  background: #f3e5f5;
-  color: #6a1b9a;
+  background: rgba(212, 175, 55, 0.12);
+  color: #e8c766;
 }
 
 .status-suspenso {
-  background: #eceff1;
-  color: #455a64;
+  background: rgba(163, 163, 163, 0.12);
+  color: #d4d4d4;
 }
 
 .priority-high {
-  background: #ffebee;
-  color: #c33;
+  background: rgba(199, 91, 91, 0.14);
+  color: #ffc6c6;
 }
 
 .priority-normal {
-  background: #e3f2fd;
-  color: #1976d2;
+  background: rgba(212, 175, 55, 0.12);
+  color: #e8c766;
 }
 
 .priority-low {
-  background: #e8f5e9;
-  color: #2e7d32;
+  background: rgba(125, 210, 150, 0.12);
+  color: #bde8c9;
 }
 
 /* Modal */
@@ -284,7 +287,7 @@ td.nome {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: rgba(0, 0, 0, 0.72);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -292,14 +295,16 @@ td.nome {
 }
 
 .modal-content {
-  background: white;
-  border-radius: 12px;
+  background: #171717;
+  border: 1px solid rgba(212, 175, 55, 0.18);
+  border-radius: 1rem;
   width: 90%;
   max-width: 600px;
   max-height: 90vh;
   overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.35);
   animation: modalSlideIn 0.3s ease-out;
+  color: #ffffff;
 }
 
 @keyframes modalSlideIn {
@@ -318,13 +323,14 @@ td.nome {
   justify-content: space-between;
   align-items: center;
   padding: 24px;
-  border-bottom: 1px solid #e8e8e8;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.18);
 }
 
 .modal-header h2 {
   font-size: 20px;
   font-weight: 600;
   margin: 0;
+  color: #ffffff;
 }
 
 .modal-content form {
@@ -349,7 +355,7 @@ td.nome {
   display: block;
   margin-bottom: 8px;
   font-weight: 600;
-  color: #333;
+  color: #ffffff;
   font-size: 13px;
 }
 
@@ -358,8 +364,10 @@ td.nome {
 .form-group textarea {
   width: 100%;
   padding: 12px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
+  border: 1px solid rgba(212, 175, 55, 0.24);
+  border-radius: 12px;
+  background: #090909;
+  color: #ffffff;
   font-size: 13px;
   font-family: inherit;
   transition: all 0.3s ease;
@@ -369,8 +377,8 @@ td.nome {
 .form-group select:focus,
 .form-group textarea:focus {
   outline: none;
-  border-color: #667eea;
-  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+  border-color: rgba(232, 199, 102, 0.8);
+  box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.12);
 }
 
 .modal-actions {
@@ -378,7 +386,7 @@ td.nome {
   gap: 12px;
   justify-content: flex-end;
   padding-top: 20px;
-  border-top: 1px solid #e8e8e8;
+  border-top: 1px solid rgba(212, 175, 55, 0.18);
 }
 
 .modal-actions button {

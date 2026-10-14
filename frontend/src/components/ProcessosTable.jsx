@@ -30,7 +30,8 @@ export default function ProcessosTable({
 
   if (loading) {
     return (
-      <div className="rounded-3xl border p-8 shadow-sm" style={{ borderColor: 'rgba(212, 175, 55, 0.2)', background: '#111111' }}>
+      <div className="rounded-3xl border p-8 shadow-sm" aria-live="polite" style={{ borderColor: 'rgba(212, 175, 55, 0.2)', background: '#111111' }}>
+        <p className="mb-4 text-sm font-medium" style={{ color: '#f5f1e8' }}>Carregando processos...</p>
         <div className="animate-pulse space-y-4">
           <div className="h-4 w-3/5 rounded" style={{ background: 'rgba(212, 175, 55, 0.2)' }} />
           <div className="h-4 w-full rounded" style={{ background: 'rgba(212, 175, 55, 0.2)' }} />
@@ -45,7 +46,7 @@ export default function ProcessosTable({
 
   if (error) {
     return (
-      <div className="rounded-3xl border border-rose-200 bg-rose-50 p-6 text-rose-800 shadow-sm">
+      <div className="processos-table-error" role="alert">
         <p className="font-semibold">Erro ao carregar processos</p>
         <p className="mt-2 text-sm">Não foi possível carregar os processos.</p>
       </div>

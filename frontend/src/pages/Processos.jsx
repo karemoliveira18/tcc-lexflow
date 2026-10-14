@@ -3,8 +3,8 @@ import { processosAPI, clientesAPI } from "../api";
 import ProcessosTable from "../components/ProcessosTable";
 import ProcessoForm from "../components/ProcessoForm";
 import Alert from "../components/Alert";
-import { Plus } from "lucide-react";
-import ProcessosFetch from "../components/ProcessosFetch";
+import MetricCard from "../components/MetricCard";
+import { CalendarDays, CheckCircle2, Clock3, FileText, Plus } from "lucide-react";
 
 export default function Processos() {
   const [processos, setProcessos] = useState([]);
@@ -56,11 +56,19 @@ export default function Processos() {
 
     try {
       const response = await processosAPI.getAllProcessos();
-      setProcessos(response.data?.data || []);
+      const data = response.data?.data;
+      if (!Array.isArray(data)) {
+        throw new Error('Resposta inválida ao carregar processos.');
+      }
+      setProcessos(data);
     } catch (err) {
       console.error("Erro ao carregar processos:", err);
+      const apiError = err.response?.data?.error;
       setError(
-        err.response?.data?.error || "Não foi possível carregar os processos.",
+        (typeof apiError === "string" ? apiError : apiError?.message)
+        || err.response?.data?.message
+        || err.message
+        || "Não foi possível carregar os processos.",
       );
     } finally {
       setLoading(false);
@@ -70,27 +78,6 @@ export default function Processos() {
   const handleNewProcesso = () => {
     setEditingProcesso(null);
     setShowForm(true);
-  };
-
-  // Exemplo simples usando fetch() (sem axios) para a AV2
-  const fetchProcessosWithFetch = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const base = import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api";
-      const token = localStorage.getItem("token");
-      const res = await fetch(`${base}/processos`, {
-        headers: token ? { Authorization: `Bearer ${token}` } : {},
-      });
-      if (!res.ok) throw new Error("Erro na resposta");
-      const data = await res.json();
-      setProcessos(data?.data || []);
-    } catch (err) {
-      console.error("fetch() error:", err);
-      setError("Não foi possível carregar os processos.");
-    } finally {
-      setLoading(false);
-    }
   };
 
   const handleEditProcesso = (processo) => {
@@ -116,6 +103,18 @@ export default function Processos() {
     setMessage(messageText);
     setMessageType(type);
   };
+
+  const hoje = new Date();
+  hoje.setHours(0, 0, 0, 0);
+  const emSeteDias = new Date(hoje);
+  emSeteDias.setDate(emSeteDias.getDate() + 7);
+  const prazosProximos = processos.filter((processo) => {
+    if (processo.status === "concluído") return false;
+    const [ano, mes, dia] = String(processo.prazo || "").split("T")[0].split("-").map(Number);
+    if (!ano || !mes || !dia) return false;
+    const prazo = new Date(ano, mes - 1, dia);
+    return prazo >= hoje && prazo <= emSeteDias;
+  }).length;
 
   return (
     <div className="processos-page px-4 py-6 sm:px-6 lg:px-8">
@@ -147,6 +146,33 @@ export default function Processos() {
         </div>
       )}
 
+      <div className="processos-metrics-grid">
+        <MetricCard
+          title="Total de processos"
+          value={processos.length}
+          description="Todos os processos cadastrados"
+          icon={FileText}
+        />
+        <MetricCard
+          title="Processos ativos"
+          value={processos.filter((processo) => processo.status === "ativo").length}
+          description="Processos em andamento"
+          icon={Clock3}
+        />
+        <MetricCard
+          title="Processos concluídos"
+          value={processos.filter((processo) => processo.status === "concluído").length}
+          description="Processos finalizados"
+          icon={CheckCircle2}
+        />
+        <MetricCard
+          title="Prazos próximos"
+          value={prazosProximos}
+          description="Vencimentos nos próximos 7 dias"
+          icon={CalendarDays}
+        />
+      </div>
+
       <ProcessosTable
         processos={processos}
         loading={loading}
@@ -167,7 +193,6 @@ export default function Processos() {
         />
       )}
 
-      <ProcessosFetch />
     </div>
   );
 }

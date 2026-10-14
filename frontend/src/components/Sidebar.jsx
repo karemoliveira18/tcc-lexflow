@@ -4,8 +4,6 @@ import {
   Users,
   BarChart3,
   Settings,
-  HelpCircle,
-  Zap,
   X,
 } from "lucide-react";
 import Logo from "./Logo";
@@ -88,20 +86,6 @@ const Sidebar = ({ activeSection, onSectionChange, open = false, onClose, user }
         })}
       </nav>
 
-      {/* Footer da Sidebar */}
-      <div className="sidebar-footer">
-        <div className="flex items-center gap-2 mb-3">
-          <Zap size={16} style={{ color: '#d4af37' }} />
-          <span className="text-sm font-medium" style={{ color: '#f5f1e8' }}>Premium</span>
-        </div>
-        <p className="text-xs leading-relaxed mb-3" style={{ color: '#a6a6a6' }}>
-          Acesso completo a todas as funcionalidades avançadas da plataforma.
-        </p>
-        <div className="footer-badge">
-          <HelpCircle size={12} />
-          <span>Suporte 24/7</span>
-        </div>
-      </div>
     </div>
   );
 };

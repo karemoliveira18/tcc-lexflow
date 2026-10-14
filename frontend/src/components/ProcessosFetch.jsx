@@ -1,7 +1,18 @@
 import { useEffect, useState } from "react";
 
-// Componente simples que demonstra conexão direta com a API usando fetch()
-// Mostra a lista de processos em JSON usando o mesmo token da sessão autenticada.
+const getApiBaseUrl = () => {
+  if (typeof import.meta !== 'undefined' && import.meta.env) {
+    return import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  }
+
+  if (typeof process !== 'undefined' && process.env) {
+    return process.env.VITE_API_BASE_URL || 'http://localhost:5000/api';
+  }
+
+  return 'http://localhost:5000/api';
+};
+
+// Componente auxiliar que não renderiza visualmente para evitar tela em branco.
 export default function ProcessosFetch() {
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -10,7 +21,8 @@ export default function ProcessosFetch() {
     const fetchData = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || "http://localhost:5000/api"}/processos`, {
+        const baseUrl = getApiBaseUrl();
+        const res = await fetch(`${baseUrl}/processos`, {
           headers: token ? { Authorization: `Bearer ${token}` } : {},
         });
         if (!res.ok) throw new Error(`HTTP ${res.status}`);
@@ -22,8 +34,9 @@ export default function ProcessosFetch() {
         setLoading(false);
       }
     };
+
     fetchData();
   }, []);
 
-  return null;
+  return <div style={{ display: 'none' }} aria-hidden="true" />;
 }

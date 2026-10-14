@@ -129,7 +129,7 @@ const Processos = ({ showForm: externalShowForm = false, onShowFormChange }) => 
       )}
 
       {/* Métricas */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 mb-8">
+      <div className="processos-metrics-grid">
         <div className="metric-card">
           <div className="p-3 rounded-xl mb-4" style={{ background: '#111111' }}>
             <CheckCircle2 size={24} style={{ color: '#d4af37' }} />
