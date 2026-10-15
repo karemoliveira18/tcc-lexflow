@@ -38,8 +38,8 @@ const getAllUsers = async (req, res) => {
       ...(searchTerm
         ? {
             OR: [
-              { nome: { contains: searchTerm, mode: "insensitive" } },
-              { email: { contains: searchTerm, mode: "insensitive" } },
+              { nome: { contains: searchTerm } },
+              { email: { contains: searchTerm } },
             ],
           }
         : {}),

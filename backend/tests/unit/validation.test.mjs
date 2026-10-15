@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import { randomBytes } from 'node:crypto';
 import test from 'node:test';
 import {
   registerSchema,
@@ -11,10 +12,12 @@ import {
   listProcessosQuerySchema,
 } from '../../utils/validation.js';
 
+const generatedPassword = () => `${randomBytes(24).toString('base64url')}Aa7!`;
+
 test('register schema force user profile and validates invalid values', () => {
   assert.equal(registerSchema.parse({
-    email: 'admin@lexflow.com',
-    password: 'senha123',
+    email: 'admin@example.test',
+    password: generatedPassword(),
     nome: 'Administrador',
   }).perfil, 'usuario');
 
@@ -27,9 +30,9 @@ test('register schema force user profile and validates invalid values', () => {
 
 test('login schema accepts valid payload', () => {
   assert.equal(loginSchema.parse({
-    email: 'admin@lexflow.com',
-    password: 'senha123',
-  }).email, 'admin@lexflow.com');
+    email: 'admin@example.test',
+    password: generatedPassword(),
+  }).email, 'admin@example.test');
 });
 
 test('partial update schemas accept valid values', () => {

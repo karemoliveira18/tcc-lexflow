@@ -26,9 +26,9 @@ const getAllClientes = async (req, res) => {
       ...(searchTerm
         ? {
             OR: [
-              { nome: { contains: searchTerm, mode: "insensitive" } },
-              { cpfCnpj: { contains: searchTerm, mode: "insensitive" } },
-              { email: { contains: searchTerm, mode: "insensitive" } },
+              { nome: { contains: searchTerm } },
+              { cpfCnpj: { contains: searchTerm } },
+              { email: { contains: searchTerm } },
             ],
           }
         : {}),
@@ -210,15 +210,6 @@ const updateCliente = async (req, res) => {
         status: 404,
         code: "NOT_FOUND",
         message: "Cliente não encontrado",
-        details: [],
-      });
-    }
-
-    if (ativo === true && !cliente.ativo && req.user?.perfil !== "admin") {
-      return sendError(res, {
-        status: 403,
-        code: "FORBIDDEN",
-        message: "Apenas o proprietário pode reativar este cliente",
         details: [],
       });
     }

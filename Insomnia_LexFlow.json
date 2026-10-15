@@ -67,7 +67,7 @@
       ],
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"email\": \"admin@lexflow.com\",\n  \"password\": \"Senha123!\",\n  \"nome\": \"Administrador LexFlow\"\n}"
+        "text": "{\n  \"email\": \"{{ test_email }}\",\n  \"password\": \"{{ test_password }}\",\n  \"nome\": \"{{ test_name }}\"\n}"
       }
     },
     {
@@ -85,7 +85,7 @@
       ],
       "body": {
         "mimeType": "application/json",
-        "text": "{\n  \"email\": \"admin@lexflow.com\",\n  \"password\": \"Senha123!\"\n}"
+        "text": "{\n  \"email\": \"{{ test_email }}\",\n  \"password\": \"{{ test_password }}\"\n}"
       }
     },
     {

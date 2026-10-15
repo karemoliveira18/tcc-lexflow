@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import { dashboardAPI } from "../api";
 import MetricCard from "../components/MetricCard";
 import Button from "../components/Button";
@@ -18,10 +19,11 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  Legend,
+  LabelList,
 } from "recharts";
 
 export default function Dashboard() {
+  const navigate = useNavigate();
   const [metrics, setMetrics] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -46,7 +48,7 @@ export default function Dashboard() {
   if (loading) {
     return (
       <div className="dashboard-page">
-        <div className="dashboard-loading">Carregando dashboard...</div>
+        <div className="dashboard-loading" role="status">Carregando dashboard...</div>
       </div>
     );
   }
@@ -54,16 +56,27 @@ export default function Dashboard() {
   if (error) {
     return (
       <div className="dashboard-page">
-        <div className="dashboard-error">{error}</div>
+        <div className="dashboard-error" role="alert">{error}</div>
       </div>
     );
   }
 
   const resumo = metrics?.resumo || {};
   const processosPorStatus = metrics?.processosPorStatus || [];
-  const processosPorPrioridade = metrics?.processosPorPrioridade || [];
-  const processosPorArea = metrics?.processosPorArea || [];
+  const processosPorPrioridade = (Array.isArray(metrics?.processosPorPrioridade)
+    ? metrics.processosPorPrioridade
+    : [])
+    .map((item) => ({ ...item, quantidade: Number(item.quantidade) }))
+    .filter((item) => typeof item.prioridade === "string" && Number.isFinite(item.quantidade) && item.quantidade >= 0);
+  const processosPorArea = (Array.isArray(metrics?.processosPorArea)
+    ? metrics.processosPorArea
+    : [])
+    .map((item) => ({ ...item, quantidade: Number(item.quantidade) }))
+    .filter((item) => typeof item.area === "string" && Number.isFinite(item.quantidade) && item.quantidade >= 0);
   const proximosVencimentos = metrics?.proximosVencimentos || [];
+  const totalPrioridades = processosPorPrioridade.reduce((total, item) => total + item.quantidade, 0);
+  const maxProcessosPorArea = Math.max(0, ...processosPorArea.map((item) => item.quantidade));
+  const areaChartHeight = Math.max(180, processosPorArea.length * 52 + 32);
 
   const statusTotal = resumo.totalProcessos || 0;
   const taxaConclusao =
@@ -96,7 +109,7 @@ export default function Dashboard() {
         </div>
         <Button
           variant="primary"
-          onClick={() => (window.location.hash = "#processos")}
+          onClick={() => navigate("/processos")}
         >
           Acessar Processos
         </Button>
@@ -220,45 +233,72 @@ export default function Dashboard() {
       <div className="dashboard-grid dashboard-summary-grid">
         <section className="dashboard-panel summary-panel">
           <h2>Prioridade dos processos</h2>
-          <div className="pill-grid">
-            {processosPorPrioridade.map((item) => (
-              <div key={item.prioridade} className="summary-pill">
-                <div>{item.prioridade}</div>
-                <div>{item.quantidade}</div>
-              </div>
-            ))}
-          </div>
+          {totalPrioridades === 0 ? (
+            <div className="dashboard-chart-empty" role="status">
+              Não há processos para exibir por prioridade.
+            </div>
+          ) : (
+            <div className="priority-bars" aria-label="Processos por prioridade">
+              {processosPorPrioridade.map((item) => {
+                const percent = Math.round((item.quantidade / totalPrioridades) * 100);
+                return (
+                  <div key={item.prioridade} className="priority-bar-row">
+                    <div className="priority-bar-heading">
+                      <span>{item.prioridade.charAt(0).toLocaleUpperCase("pt-BR") + item.prioridade.slice(1)}</span>
+                      <span>{item.quantidade} · {percent}%</span>
+                    </div>
+                    <div
+                      className="priority-bar-track"
+                      role="progressbar"
+                      aria-label={`${item.prioridade}: ${item.quantidade} processos`}
+                      aria-valuemin={0}
+                      aria-valuemax={totalPrioridades}
+                      aria-valuenow={item.quantidade}
+                    >
+                      <div className="priority-bar-fill" style={{ width: `${percent}%` }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </section>
 
         <section className="dashboard-panel summary-panel">
           <h2>Distribuição por área</h2>
-          <p className="dashboard-copy">
-            Veja o volume de processos por área do direito em um gráfico de
-            barras.
-          </p>
-
-          <div className="area-chart-wrapper">
-            <ResponsiveContainer width="100%" height={320}>
+          {processosPorArea.length === 0 ? (
+            <div className="dashboard-chart-empty" role="status">
+              Não há processos cadastrados para exibir por área.
+            </div>
+          ) : (
+            <div className="area-chart-wrapper" aria-label="Quantidade de processos por área">
+            <ResponsiveContainer width="100%" height={areaChartHeight}>
               <BarChart
+                layout="vertical"
                 data={processosPorArea}
-                margin={{ top: 20, right: 8, left: 0, bottom: 0 }}
+                margin={{ top: 8, right: 32, left: 8, bottom: 8 }}
               >
                 <CartesianGrid
-                  stroke="#334155"
+                  stroke="rgba(255, 255, 255, 0.08)"
                   strokeDasharray="3 3"
-                  vertical={false}
+                  horizontal={false}
                 />
                 <XAxis
-                  dataKey="area"
-                  tick={{ fill: "#cbd5e1", fontSize: 12 }}
+                  type="number"
+                  domain={[0, Math.max(1, maxProcessosPorArea)]}
+                  allowDecimals={false}
+                  tick={{ fill: "#a6a6a6", fontSize: 11 }}
                   axisLine={false}
                   tickLine={false}
                 />
                 <YAxis
-                  tick={{ fill: "#cbd5e1", fontSize: 12 }}
+                  type="category"
+                  dataKey="area"
+                  width={112}
+                  tickFormatter={(area) => area.charAt(0).toLocaleUpperCase("pt-BR") + area.slice(1)}
+                  tick={{ fill: "#f5f1e8", fontSize: 12 }}
                   axisLine={false}
                   tickLine={false}
-                  width={32}
                 />
                 <Tooltip
                   contentStyle={{
@@ -269,28 +309,25 @@ export default function Dashboard() {
                   }}
                   cursor={{ fill: "rgba(212, 175, 55, 0.12)" }}
                 />
-                <Legend
-                  wrapperStyle={{ color: "#cbd5e1", paddingTop: 12 }}
-                  iconType="circle"
-                />
                 <Bar
                   dataKey="quantidade"
                   name="Processos"
                   fill="#D4AF37"
-                  radius={[12, 12, 0, 0]}
-                />
+                  radius={[0, 8, 8, 0]}
+                  maxBarSize={28}
+                >
+                  <LabelList
+                    dataKey="quantidade"
+                    position="right"
+                    fill="#f5f1e8"
+                    fontSize={12}
+                    fontWeight={700}
+                  />
+                </Bar>
               </BarChart>
             </ResponsiveContainer>
-          </div>
-
-          <div className="pill-grid mt-6">
-            {processosPorArea.map((item) => (
-              <div key={item.area} className="summary-pill">
-                <div>{item.area}</div>
-                <div>{item.quantidade}</div>
-              </div>
-            ))}
-          </div>
+            </div>
+          )}
         </section>
       </div>
     </div>

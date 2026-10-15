@@ -4,6 +4,7 @@ import ProcessosTable from "../components/ProcessosTable";
 import ProcessoForm from "../components/ProcessoForm";
 import Alert from "../components/Alert";
 import MetricCard from "../components/MetricCard";
+import { getApiErrorMessage } from "../utils/apiErrorMessage";
 import { CalendarDays, CheckCircle2, Clock3, FileText, Plus } from "lucide-react";
 
 export default function Processos() {
@@ -38,12 +39,19 @@ export default function Processos() {
       setClientesLoading(true);
       setClientesError("");
       const response = await clientesAPI.getAllClientes();
-      setClientes(response.data?.data || []);
+      const data = response.data?.data;
+      if (!Array.isArray(data)) {
+        throw new Error("A API retornou uma lista de clientes em formato inválido.");
+      }
+      setClientes(data);
     } catch (err) {
       console.error("Erro ao carregar clientes:", err);
       setClientes([]);
-      setClientesError("Não foi possível carregar os clientes.");
-      setMessage("Não foi possível carregar os clientes.");
+      const messageText = err.response
+        ? getApiErrorMessage(err, "Não foi possível carregar os clientes.")
+        : err.message || "Não foi possível carregar os clientes.";
+      setClientesError(messageText);
+      setMessage(messageText);
       setMessageType("error");
     } finally {
       setClientesLoading(false);

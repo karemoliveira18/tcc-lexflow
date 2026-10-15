@@ -1,9 +1,21 @@
-import { Trash2, Edit2 } from "lucide-react";
+import { useState } from "react";
+import { Check, Trash2, Edit2 } from "lucide-react";
 import { processosAPI } from "../api";
+import { getApiErrorMessage } from "../utils/apiErrorMessage";
 
 const formatDateOnly = (value) => {
   const [year, month, day] = String(value || "").split("T")[0].split("-");
   return year && month && day ? `${day}/${month}/${year}` : "-";
+};
+
+const isOverdue = (value) => {
+  const [year, month, day] = String(value || "").split("T")[0].split("-").map(Number);
+  if (!year || !month || !day) return false;
+
+  const deadline = new Date(year, month - 1, day);
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return deadline < today;
 };
 
 export default function ProcessosTable({
@@ -14,8 +26,28 @@ export default function ProcessosTable({
   onRefresh,
   onMessage,
 }) {
+  const [statusFilter, setStatusFilter] = useState("todos");
+
+  const filteredProcessos = (processos || []).filter((processo) => {
+    if (statusFilter === "ativos") return processo.status === "ativo";
+    if (statusFilter === "concluidos") return processo.status === "concluído";
+    return true;
+  });
+
+  const handleComplete = async (processo) => {
+    if (!window.confirm(`Concluir o processo “${processo.titulo}”?`)) return;
+
+    try {
+      await processosAPI.updateProcesso(processo.id, { status: "concluído" });
+      onMessage?.("Processo concluído com sucesso.", "success");
+      onRefresh?.();
+    } catch (err) {
+      onMessage?.(getApiErrorMessage(err, "Não foi possível concluir o processo."), "error");
+    }
+  };
+
   const handleDelete = async (id) => {
-    if (!window.confirm("Tem certeza que deseja deletar este processo?")) {
+    if (!window.confirm("Tem certeza que deseja excluir este processo permanentemente?")) {
       return;
     }
 
@@ -24,7 +56,7 @@ export default function ProcessosTable({
       onMessage?.("Processo excluído com sucesso.", "success");
       onRefresh?.();
     } catch (err) {
-      onMessage?.("Erro ao excluir o processo.", "error");
+      onMessage?.(getApiErrorMessage(err, "Não foi possível excluir o processo."), "error");
     }
   };
 
@@ -67,7 +99,7 @@ export default function ProcessosTable({
   }
 
   return (
-    <div className="overflow-hidden rounded-3xl border shadow-sm" style={{ borderColor: 'rgba(212, 175, 55, 0.2)', background: '#111111' }}>
+    <div className="processos-table-card overflow-hidden rounded-3xl border shadow-sm" style={{ borderColor: 'rgba(212, 175, 55, 0.2)', background: '#111111' }}>
       <div className="px-6 py-4 border-b" style={{ borderColor: 'rgba(212, 175, 55, 0.2)', background: '#0d0d0d' }}>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
@@ -89,8 +121,32 @@ export default function ProcessosTable({
         </div>
       </div>
 
+      <div className="processos-status-filters" role="group" aria-label="Filtrar processos por status">
+        {[
+          { id: "todos", label: "Todos" },
+          { id: "ativos", label: "Ativos" },
+          { id: "concluidos", label: "Concluídos" },
+        ].map((filter) => (
+          <button
+            key={filter.id}
+            type="button"
+            onClick={() => setStatusFilter(filter.id)}
+            aria-pressed={statusFilter === filter.id}
+            className={`processos-status-filter${statusFilter === filter.id ? " is-active" : ""}`}
+          >
+            {filter.label}
+          </button>
+        ))}
+      </div>
+
       <div className="overflow-x-auto">
-        <table className="min-w-full text-sm" style={{ background: '#111111', color: '#f5f1e8' }}>
+        {filteredProcessos.length === 0 ? (
+          <div className="processos-filter-empty" role="status">
+            {processos.length === 0
+              ? "Nenhum processo cadastrado."
+              : "Nenhum processo corresponde a este filtro."}
+          </div>
+        ) : <table className="processos-data-table min-w-full text-sm" style={{ background: '#111111', color: '#f5f1e8' }}>
           <thead style={{ background: '#0b0b0b' }}>
             <tr>
               <th className="px-6 py-4 text-left font-semibold" style={{ color: '#d4af37' }}>Título</th>
@@ -103,56 +159,73 @@ export default function ProcessosTable({
             </tr>
           </thead>
           <tbody>
-            {processos.map((processo) => (
+            {filteredProcessos.map((processo) => {
+              const overdue = processo.status !== "concluído" && isOverdue(processo.prazo);
+              return (
               <tr key={processo.id} style={{ borderTop: '1px solid rgba(212, 175, 55, 0.08)' }}>
-                <td className="px-6 py-4 whitespace-nowrap font-medium" style={{ color: '#f5f1e8' }}>
+                <td className="processos-title-cell px-6 py-4 font-medium" style={{ color: '#f5f1e8' }}>
                   {processo.titulo}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap" style={{ color: '#a6a6a6' }}>
+                <td className="processos-wrap-cell px-6 py-4" style={{ color: '#a6a6a6' }}>
                   {processo.area}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap" style={{ color: '#a6a6a6' }}>
+                <td className="processos-wrap-cell px-6 py-4" style={{ color: '#a6a6a6' }}>
                   {processo.cliente?.nome || "Sem cliente"}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap" style={{ color: '#a6a6a6' }}>
-                  {formatDateOnly(processo.prazo)}
+                <td className="px-6 py-4">
+                  <span className={overdue ? "processos-deadline overdue" : "processos-deadline"}>
+                    {formatDateOnly(processo.prazo)}
+                  </span>
+                  {overdue && <span className="processos-overdue-label">Vencido</span>}
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4">
                   <span className="inline-flex rounded-full px-3 py-1 text-xs font-semibold" style={{ background: 'rgba(212, 175, 55, 0.12)', color: '#f5d780' }}>
                     {processo.status}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap">
+                <td className="px-6 py-4">
                   <span className="inline-flex rounded-full px-3 py-1 text-xs font-semibold" style={{ background: 'rgba(212, 175, 55, 0.12)', color: '#f5d780' }}>
                     {processo.prioridade}
                   </span>
                 </td>
-                <td className="px-6 py-4 whitespace-nowrap text-right" style={{ color: '#a6a6a6' }}>
-                  <div className="flex justify-end gap-2">
+                <td className="px-6 py-4 text-right" style={{ color: '#a6a6a6' }}>
+                  <div className="processos-row-actions">
                     <button
                       type="button"
                       onClick={() => onEdit?.(processo)}
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-full border transition"
+                      className="processos-action-button edit"
                       style={{ borderColor: 'rgba(212, 175, 55, 0.25)', background: '#0a0a0a', color: '#d4af37' }}
                       title="Editar"
+                      aria-label={`Editar ${processo.titulo}`}
                     >
                       <Edit2 size={16} />
                     </button>
+                    {processo.status !== "concluído" && (
+                      <button
+                        type="button"
+                        onClick={() => handleComplete(processo)}
+                        className="processos-action-button complete"
+                        title="Concluir processo"
+                        aria-label={`Concluir ${processo.titulo}`}
+                      >
+                        <Check size={16} />
+                      </button>
+                    )}
                     <button
                       type="button"
                       onClick={() => handleDelete(processo.id)}
-                      className="inline-flex h-9 w-9 items-center justify-center rounded-full border transition"
-                      style={{ borderColor: 'rgba(255, 107, 107, 0.35)', background: 'rgba(200, 80, 80, 0.12)', color: '#ffb4b4' }}
+                        className="processos-action-button delete"
                       title="Excluir"
+                      aria-label={`Excluir ${processo.titulo}`}
                     >
                       <Trash2 size={16} />
                     </button>
                   </div>
                 </td>
               </tr>
-            ))}
+            );})}
           </tbody>
-        </table>
+        </table>}
       </div>
     </div>
   );

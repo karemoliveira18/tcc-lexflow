@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { processosAPI } from "../api";
+import { getApiErrorMessage } from "../utils/apiErrorMessage";
 import { X } from "lucide-react";
 
 const initialFormData = {
@@ -45,6 +46,24 @@ export default function ProcessoForm({ processo, clientes, clientesLoading, clie
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+
+    if (clientesLoading) {
+      setError("Aguarde o carregamento dos clientes antes de salvar o processo.");
+      return;
+    }
+
+    if (clientesError) {
+      setError(clientesError);
+      return;
+    }
+
+    if (!formData.clienteId) {
+      setError(clientes.length === 0
+        ? "Cadastre um cliente primeiro na tela Clientes para criar um processo."
+        : "Selecione um cliente cadastrado na lista antes de salvar o processo.");
+      return;
+    }
+
     setLoading(true);
 
     try {
@@ -57,11 +76,7 @@ export default function ProcessoForm({ processo, clientes, clientesLoading, clie
       }
       onClose?.();
     } catch (err) {
-      const apiError = err.response?.data?.error;
-      const errorMessage =
-        (typeof apiError === "string" ? apiError : apiError?.message)
-        || err.response?.data?.message
-        || "Erro ao salvar processo";
+      const errorMessage = getApiErrorMessage(err, "Erro ao salvar processo. Verifique os dados e tente novamente.");
       setError(errorMessage);
       onSave?.(errorMessage, "error");
     } finally {
@@ -185,7 +200,7 @@ export default function ProcessoForm({ processo, clientes, clientesLoading, clie
                     </button>
                   )}
                 </div>
-                {mostrarSugestoes && !clientesLoading && !clientesError && (
+                {mostrarSugestoes && !clientesLoading && !clientesError && clientes.length > 0 && (
                   <div className="processo-client-suggestions" role="listbox">
                     {clientesFiltrados.length > 0 ? clientesFiltrados.map((cliente) => (
                       <button
@@ -199,12 +214,12 @@ export default function ProcessoForm({ processo, clientes, clientesLoading, clie
                         {cliente.cpfCnpj && <span>CPF/CNPJ: {cliente.cpfCnpj}</span>}
                       </button>
                     )) : (
-                      <p className="processo-client-empty">Cliente não encontrado.</p>
+                      <p className="processo-client-empty">Nenhum cliente corresponde à busca.</p>
                     )}
                   </div>
                 )}
                 {!clientesLoading && clientesError && <p className="processo-client-feedback">{clientesError}</p>}
-                {!clientesLoading && !clientesError && clientes.length === 0 && <p className="processo-client-feedback">Nenhum cliente cadastrado.</p>}
+                {!clientesLoading && !clientesError && clientes.length === 0 && <p className="processo-client-feedback">Nenhum cliente cadastrado. Cadastre um cliente na tela Clientes antes de criar um processo.</p>}
               </div>
             </label>
 

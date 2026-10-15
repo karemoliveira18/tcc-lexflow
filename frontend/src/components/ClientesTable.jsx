@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { clientesAPI } from '../api';
+import { getApiErrorMessage } from '../utils/apiErrorMessage';
 import { Trash2, Edit2 } from 'lucide-react';
 
 export default function ClientesTable({ refreshTrigger, onEdit, onDelete }) {
@@ -22,7 +23,7 @@ export default function ClientesTable({ refreshTrigger, onEdit, onDelete }) {
       setClientes(data);
       setError('');
     } catch (err) {
-      setError(err.message || 'Erro ao carregar clientes');
+      setError(getApiErrorMessage(err, 'Não foi possível carregar os clientes.'));
     } finally {
       setLoading(false);
     }

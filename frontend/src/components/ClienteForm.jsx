@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { clientesAPI } from '../api';
+import { getApiErrorMessage } from '../utils/apiErrorMessage';
 import { X } from 'lucide-react';
 
 export default function ClienteForm({ cliente, onClose, onSave }) {
@@ -29,20 +30,22 @@ export default function ClienteForm({ cliente, onClose, onSave }) {
     setLoading(true);
 
     try {
+      const payload = {
+        ...formData,
+        estado: typeof formData.estado === 'string'
+          ? formData.estado.trim().toUpperCase()
+          : formData.estado,
+      };
+
       if (cliente) {
-        await clientesAPI.updateCliente(cliente.id, formData);
+        await clientesAPI.updateCliente(cliente.id, payload);
       } else {
-        await clientesAPI.createCliente(formData);
+        await clientesAPI.createCliente(payload);
       }
       onSave?.(cliente ? 'Cliente atualizado com sucesso.' : 'Cliente cadastrado com sucesso.');
       onClose?.();
     } catch (err) {
-      const apiError = err.response?.data?.error;
-      setError(
-        (typeof apiError === 'string' ? apiError : apiError?.message)
-          || err.response?.data?.message
-          || 'Erro ao salvar cliente',
-      );
+      setError(getApiErrorMessage(err, 'Erro ao salvar cliente. Verifique os dados e tente novamente.'));
     } finally {
       setLoading(false);
     }

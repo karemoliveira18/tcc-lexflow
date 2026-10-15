@@ -9,3 +9,4 @@ node_modules/
 # Prisma generated files
 generated/
 prisma/dev.db
+prisma/lexflow-test-*.db

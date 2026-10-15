@@ -86,9 +86,9 @@ O cliente deve normalmente enviar:
 Authorization: Bearer <token-jwt>
 ```
 
-O token contém `userId`, `email` e `perfil`, usa `JWT_SECRET` e expira em sete dias. Um token ausente gera `401`; token inválido ou expirado gera `403`.
+O token contém `userId`, `email` e `perfil`, usa `JWT_SECRET` e expira em sete dias. Tokens ausentes, inválidos ou expirados são rejeitados com `401`. O middleware consulta o usuário atual no banco e também bloqueia contas inativas.
 
-Entretanto, há um **fallback de desenvolvimento**: quando nenhum token é enviado, o middleware procura no banco o usuário definido em `DEV_USER_EMAIL`, ou `admin@lexflow.com` por padrão, e autentica a requisição como esse usuário. Na prática, se o usuário seed existir, todas as rotas marcadas como protegidas podem ser acessadas sem token. O código comenta que esse comportamento é voltado à AV2, mas ele não está condicionado a `NODE_ENV=development`.
+As senhas são verificadas com bcrypt (`bcryptjs`, custo 10). O cadastro público exige e-mail, senha e nome; embora o perfil possa chegar no payload por compatibilidade, a validação e o controller sempre criam o perfil `usuario`. Não há autenticação automática sem token.
 
 ### Matriz de acesso atual
 
@@ -96,11 +96,11 @@ Entretanto, há um **fallback de desenvolvimento**: quando nenhum token é envia
 |---|---:|---:|---:|
 | Registro e login | Sim | Sim | Não |
 | Health check | Sim | Sim | Não |
-| Perfil | Sim, se o fallback encontrar o seed | Sim | Não |
-| Usuários | Sim, se o fallback encontrar o seed | Sim | Não |
-| Clientes | Sim, se o fallback encontrar o seed | Sim | Não |
-| Processos | Sim, se o fallback encontrar o seed | Sim | Não |
-| Dashboard | Sim, se o fallback encontrar o seed | Sim | Não |
+| Perfil | Não | Sim | Qualquer usuário ativo |
+| Usuários | Não | Sim | Somente `admin` |
+| Clientes | Não | Sim | Somente registros do proprietário |
+| Processos | Não | Sim | Somente registros do proprietário |
+| Dashboard | Não | Sim | Somente dados do proprietário |
 
 ## 5. Catálogo detalhado das rotas prontas
 
@@ -132,7 +132,7 @@ Corpo esperado:
 ```json
 {
   "email": "usuario@exemplo.com",
-  "password": "Senha123!",
+  "password": "{{ senha configurada no ambiente local }}",
   "nome": "Nome do usuário",
   "perfil": "usuario"
 }
@@ -156,7 +156,7 @@ Corpo esperado:
 ```json
 {
   "email": "usuario@exemplo.com",
-  "password": "Senha123!"
+  "password": "{{ senha configurada no ambiente local }}"
 }
 ```
 
@@ -412,13 +412,7 @@ Detalhes importantes:
 
 ## 6. Seed e dados iniciais
 
-O comando `npm run seed` cria ou atualiza:
-
-- usuário `admin@lexflow.com`, perfil `advogado` e senha definida no próprio script;
-- um cliente de demonstração;
-- um processo de demonstração com prazo quinze dias à frente da execução do seed.
-
-O uso de `upsert` torna o seed repetível. Porém, a credencial conhecida no código não deve ser utilizada em produção.
+Os comandos `npm run seed:test` e `npm run seed` criam/atualizam três contas fictícias reservadas no domínio `.test` — um `admin` e dois `advogado`. O seed exige opt-in e `NODE_ENV` de desenvolvimento/homologação, recebe senhas fortes por variáveis de ambiente e armazena apenas hashes bcrypt. Não redefine o banco, não remove registros e não cria dados de clientes/processos.
 
 ## 7. O que foi validado nesta análise
 

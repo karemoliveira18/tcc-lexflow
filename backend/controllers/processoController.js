@@ -33,10 +33,10 @@ const getAllProcessos = async (req, res) => {
 
     const where = {
       userId,
-      ...(searchTerm ? { titulo: { contains: searchTerm, mode: "insensitive" } } : {}),
+      ...(searchTerm ? { titulo: { contains: searchTerm } } : {}),
       ...(status ? { status } : {}),
       ...(prioridade ? { prioridade } : {}),
-      ...(areaFilter ? { area: { contains: areaFilter, mode: "insensitive" } } : {}),
+      ...(areaFilter ? { area: { contains: areaFilter } } : {}),
       ...(clienteId ? { clienteId } : {}),
       ...(Object.keys(prazoFilter).length ? { prazo: prazoFilter } : {}),
     };

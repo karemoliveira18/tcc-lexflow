@@ -76,7 +76,7 @@ cp .env.example .env
 # Ajuste as credenciais do servidor de produção no arquivo .env
 npx prisma generate
 npx prisma db push
-npm run seed
+# Opcional: crie contas de QA apenas com npm run seed:test em desenvolvimento/homologação.
 npm run dev
 ```
 
@@ -98,10 +98,9 @@ npm run dev
 
 Este projeto usa MySQL via Prisma ORM. A configuração da conexão está em `backend/.env`.
 
-### Usuário de exemplo após seed
+### Contas fictícias para desenvolvimento/homologação
 
-- Email: `admin@lexflow.com`
-- Senha: `Senha123!`
+O comando `npm run seed:test` cria de forma idempotente um administrador e dois advogados com e-mails reservados no domínio `.test`. Ele não redefine o banco nem remove registros. Execute-o somente em desenvolvimento ou homologação, com `NODE_ENV` e `LEXFLOW_ALLOW_TEST_USERS=true` definidos e as variáveis `LEXFLOW_TEST_ADMIN_PASSWORD`, `LEXFLOW_TEST_LAWYER1_PASSWORD` e `LEXFLOW_TEST_LAWYER2_PASSWORD` preenchidas com senhas fortes diferentes. As senhas são validadas e gravadas somente como hash bcrypt; não são armazenadas no repositório.
 
 ## 🧪 Testes e Validação
 

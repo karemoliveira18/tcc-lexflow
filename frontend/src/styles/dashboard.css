@@ -607,6 +607,7 @@ body {
 
 .dashboard-summary-grid {
   grid-template-columns: repeat(1, minmax(0, 1fr));
+  align-items: stretch;
 }
 
 @media (min-width: 1024px) {
@@ -616,7 +617,14 @@ body {
 }
 
 .summary-panel h2 {
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.summary-panel {
+  display: flex;
+  min-width: 0;
+  height: 100%;
+  flex-direction: column;
 }
 
 .dashboard-copy {
@@ -628,17 +636,69 @@ body {
 
 .area-chart-wrapper {
   width: 100%;
-  min-height: 320px;
+  min-width: 0;
   background: rgba(15, 15, 15, 0.92);
   border: 1px solid rgba(212, 175, 55, 0.14);
-  border-radius: 1.5rem;
-  padding: 1rem;
-  margin-top: 1.5rem;
+  border-radius: 1rem;
+  padding: 0.5rem;
+  margin-top: 0.25rem;
 }
 
-.area-chart-wrapper .recharts-wrapper {
-  width: 100% !important;
-  height: 100% !important;
+.priority-bars {
+  display: grid;
+  gap: 1rem;
+  margin-top: 0.25rem;
+}
+
+.priority-bar-row {
+  display: grid;
+  gap: 0.45rem;
+}
+
+.priority-bar-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  color: var(--lex-ivory);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.priority-bar-heading span:last-child {
+  color: var(--lex-gray);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.priority-bar-track {
+  height: 0.65rem;
+  overflow: hidden;
+  border: 1px solid rgba(212, 175, 55, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.priority-bar-fill {
+  height: 100%;
+  min-width: 0.25rem;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #b99122, #f0d47b);
+  transition: width 250ms ease;
+}
+
+.dashboard-chart-empty {
+  display: flex;
+  min-height: 8rem;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  border: 1px dashed rgba(212, 175, 55, 0.2);
+  border-radius: 1rem;
+  background: rgba(10, 10, 10, 0.55);
+  color: var(--lex-gray);
+  text-align: center;
 }
 
 .pill-grid {
@@ -1033,6 +1093,137 @@ body {
 .processos-table-error p + p {
   margin-top: 0.5rem;
   color: var(--lex-gray);
+}
+
+.processos-status-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid rgba(212, 175, 55, 0.12);
+}
+
+.processos-status-filter {
+  min-height: 2.5rem;
+  padding: 0.5rem 1rem;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 999px;
+  background: #0a0a0a;
+  color: #c3c3c3;
+  font-size: 0.875rem;
+  font-weight: 600;
+  transition: color 150ms ease, border-color 150ms ease, background 150ms ease;
+}
+
+.processos-status-filter:hover,
+.processos-status-filter.is-active {
+  border-color: rgba(212, 175, 55, 0.65);
+  background: rgba(212, 175, 55, 0.12);
+  color: #f5d780;
+}
+
+.processos-filter-empty {
+  padding: 2rem 1.5rem;
+  color: #a6a6a6;
+  text-align: center;
+}
+
+.processos-data-table {
+  min-width: 860px;
+  table-layout: fixed;
+}
+
+.processos-data-table th,
+.processos-data-table td {
+  overflow-wrap: anywhere;
+  vertical-align: middle;
+}
+
+.processos-data-table th:nth-child(1) { width: 19%; }
+.processos-data-table th:nth-child(2) { width: 14%; }
+.processos-data-table th:nth-child(3) { width: 16%; }
+.processos-data-table th:nth-child(4) { width: 13%; }
+.processos-data-table th:nth-child(5) { width: 12%; }
+.processos-data-table th:nth-child(6) { width: 12%; }
+.processos-data-table th:nth-child(7) { width: 14%; }
+
+.processos-title-cell,
+.processos-wrap-cell {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.processos-row-actions {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.processos-action-button {
+  display: inline-flex;
+  width: 2.25rem;
+  height: 2.25rem;
+  flex: 0 0 auto;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  border-radius: 999px;
+  background: #0a0a0a;
+  color: #d4af37;
+  transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
+}
+
+.processos-action-button:hover {
+  transform: translateY(-1px);
+  border-color: rgba(212, 175, 55, 0.65);
+  background: rgba(212, 175, 55, 0.12);
+}
+
+.processos-action-button.complete {
+  border-color: rgba(125, 210, 150, 0.4);
+  color: #a9e6bb;
+}
+
+.processos-action-button.complete:hover {
+  background: rgba(55, 125, 80, 0.2);
+}
+
+.processos-action-button.delete {
+  border-color: rgba(255, 107, 107, 0.35);
+  background: rgba(200, 80, 80, 0.12);
+  color: #ffb4b4;
+}
+
+.processos-deadline {
+  display: inline-block;
+  color: #c3c3c3;
+}
+
+.processos-deadline.overdue {
+  color: #ffb4b4;
+  font-weight: 700;
+}
+
+.processos-overdue-label {
+  display: block;
+  margin-top: 0.25rem;
+  color: #ffb4b4;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 640px) {
+  .processos-status-filters {
+    padding: 0.85rem 1rem;
+  }
+
+  .processos-table-card > .overflow-x-auto {
+    overscroll-behavior-x: contain;
+  }
 }
 
 .processo-modal h2 {
