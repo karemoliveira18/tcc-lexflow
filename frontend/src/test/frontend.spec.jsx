@@ -463,8 +463,8 @@ describe('LexFlow frontend behaviors', () => {
     expect(screen.getByRole('link', { name: /lexflow início/i })).toBeInTheDocument();
     expect(screen.queryByText(/© 2026 lexflow/i)).not.toBeInTheDocument();
 
-    rerender(<MemoryRouter><Sidebar activeSection="dashboard" onSectionChange={jest.fn()} /></MemoryRouter>);
-    expect(screen.getByRole('button', { name: /dashboard/i })).toBeInTheDocument();
+    rerender(<MemoryRouter><Sidebar user={{ perfil: 'admin' }} /></MemoryRouter>);
+    expect(screen.getByRole('link', { name: /dashboard/i })).toBeInTheDocument();
     expect(screen.queryByText('Premium')).not.toBeInTheDocument();
     expect(screen.queryByText('Suporte 24/7')).not.toBeInTheDocument();
   });

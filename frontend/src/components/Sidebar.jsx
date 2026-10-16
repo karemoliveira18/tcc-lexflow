@@ -6,24 +6,28 @@ import {
   Settings,
   X,
 } from "lucide-react";
+import { NavLink } from "react-router-dom";
 import Logo from "./Logo";
 
-const Sidebar = ({ activeSection, onSectionChange, open = false, onClose, user }) => {
+const Sidebar = ({ open = false, onClose, user }) => {
   const navigationItems = [
     {
       id: "dashboard",
+      to: "/dashboard",
       label: "Dashboard",
       icon: BarChart3,
       description: "Visão geral e métricas",
     },
     {
       id: "processos",
+      to: "/processos",
       label: "Processos",
       icon: FileText,
       description: "Gerenciar processos judiciais",
     },
     {
       id: "clientes",
+      to: "/clientes",
       label: "Clientes",
       icon: Users,
       description: "Base de clientes",
@@ -32,6 +36,7 @@ const Sidebar = ({ activeSection, onSectionChange, open = false, onClose, user }
       ? [
           {
             id: "usuarios",
+            to: "/usuarios",
             label: "Usuários",
             icon: Users,
             description: "Gestão de usuários e permissões",
@@ -40,6 +45,7 @@ const Sidebar = ({ activeSection, onSectionChange, open = false, onClose, user }
       : []),
     {
       id: "configuracoes",
+      to: "/configuracoes",
       label: "Configurações",
       icon: Settings,
       description: "Preferências do sistema",
@@ -67,21 +73,19 @@ const Sidebar = ({ activeSection, onSectionChange, open = false, onClose, user }
       <nav className="nav-section">
         {navigationItems.map((item) => {
           const Icon = item.icon;
-          const isActive = activeSection === item.id;
 
           return (
-            <button
+            <NavLink
               key={item.id}
-              className={`nav-item ${isActive ? "active" : ""}`}
-              onClick={() => {
-                onSectionChange(item.id);
-                onClose?.();
-              }}
+              to={item.to}
+              end
+              className={({ isActive }) => `nav-item ${isActive ? "active" : ""}`}
+              onClick={onClose}
               title={item.description}
             >
               <Icon className="nav-icon" size={18} />
               <span>{item.label}</span>
-            </button>
+            </NavLink>
           );
         })}
       </nav>

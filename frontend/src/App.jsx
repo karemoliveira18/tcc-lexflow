@@ -14,7 +14,7 @@ import Usuarios from "./pages/Usuarios";
 import "./styles/globals.css";
 import "./styles/dashboard.css";
 
-function AppLayout({ user, onLogout, setSidebarOpen, sidebarOpen, activeSection, setActiveSection }) {
+function AppLayout({ user, onLogout, setSidebarOpen, sidebarOpen, activeSection }) {
   const renderContent = () => {
     switch (activeSection) {
       case "dashboard":
@@ -45,11 +45,8 @@ function AppLayout({ user, onLogout, setSidebarOpen, sidebarOpen, activeSection,
     <div className="app-container">
       <div className={`sidebar-backdrop ${sidebarOpen ? "visible" : ""}`} onClick={() => setSidebarOpen(false)} />
       <Sidebar
-        activeSection={activeSection}
-        onSectionChange={setActiveSection}
         open={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
-        userName={user?.nome}
         user={user}
       />
 
@@ -68,7 +65,6 @@ function AppLayout({ user, onLogout, setSidebarOpen, sidebarOpen, activeSection,
 
 function App() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState("dashboard");
   const { user, isAuthenticated, isInitializing, login, logout } = useAuth();
 
   const navigate = useNavigate();
@@ -106,8 +102,7 @@ function App() {
               onLogout={handleLogout}
               setSidebarOpen={setSidebarOpen}
               sidebarOpen={sidebarOpen}
-              activeSection={activeSection}
-              setActiveSection={setActiveSection}
+              activeSection="dashboard"
             />
           </ProtectedRoute>
         }
@@ -123,7 +118,6 @@ function App() {
               setSidebarOpen={setSidebarOpen}
               sidebarOpen={sidebarOpen}
               activeSection="clientes"
-              setActiveSection={setActiveSection}
             />
           </ProtectedRoute>
         }
@@ -139,7 +133,6 @@ function App() {
               setSidebarOpen={setSidebarOpen}
               sidebarOpen={sidebarOpen}
               activeSection="processos"
-              setActiveSection={setActiveSection}
             />
           </ProtectedRoute>
         }
@@ -155,7 +148,6 @@ function App() {
               setSidebarOpen={setSidebarOpen}
               sidebarOpen={sidebarOpen}
               activeSection="configuracoes"
-              setActiveSection={setActiveSection}
             />
           </ProtectedRoute>
         }
@@ -171,7 +163,6 @@ function App() {
               setSidebarOpen={setSidebarOpen}
               sidebarOpen={sidebarOpen}
               activeSection="usuarios"
-              setActiveSection={setActiveSection}
             />
           </ProtectedRoute>
         }
