@@ -47,7 +47,7 @@ app.use(express.json());
 
 app.use("/api/auth", authRoutes);
 
-app.get("/api/health", (req, res) => {
+app.get(["/health", "/api/health"], (req, res) => {
   res.json({ status: "OK", message: "LexFlow API is running" });
 });
 
@@ -120,7 +120,7 @@ app.use((error, req, res, next) => {
 const startServer = async () => {
   await initializeDatabase();
 
-  const server = app.listen(PORT, () => {
+  const server = app.listen(PORT, "0.0.0.0", () => {
     console.log(`🚀 LexFlow API running on port ${PORT}`);
     console.log(`📊 Database: ${env.DATABASE_URL.includes("mysql") ? "MySQL" : "configured backend"}`);
     console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);

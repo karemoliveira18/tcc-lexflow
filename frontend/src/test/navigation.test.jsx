@@ -24,6 +24,28 @@ const renderNavigation = (initialPath = '/dashboard', perfil = 'admin') => rende
   </MemoryRouter>,
 );
 
+describe('Apache subdirectory navigation', () => {
+  it('keeps sidebar links under the configured basename', () => {
+    render(
+      <MemoryRouter basename="/tecti/2026/gpec02" initialEntries={['/tecti/2026/gpec02/dashboard']}>
+        <Sidebar user={{ perfil: 'admin' }} />
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole('link', { name: 'Clientes' })).toHaveAttribute('href', '/tecti/2026/gpec02/clientes');
+  });
+
+  it('keeps the access-denied return link under the basename', () => {
+    render(
+      <MemoryRouter basename="/tecti/2026/gpec02" initialEntries={['/tecti/2026/gpec02/usuarios']}>
+        <ProtectedRoute isAuthenticated user={{ perfil: 'usuario' }} requiredProfile="admin">
+          <p>Restricted content</p>
+        </ProtectedRoute>
+      </MemoryRouter>,
+    );
+    expect(screen.getByRole('link', { name: 'Voltar ao dashboard' })).toHaveAttribute('href', '/tecti/2026/gpec02/dashboard');
+  });
+});
+
 describe('sidebar route navigation', () => {
   it.each([
     ['Dashboard', '/dashboard'],

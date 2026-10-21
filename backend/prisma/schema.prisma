@@ -8,7 +8,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
@@ -36,7 +36,7 @@ model Cliente {
   cidade       String?
   estado       String?
   cep          String?
-  observacoes  String?
+  observacoes  String?  @db.Text
   ativo        Boolean  @default(true)
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
@@ -54,7 +54,7 @@ model Processo {
   area        String
   prazo       DateTime
   status      String   @default("ativo") // "ativo", "aguardando", "concluído", "suspenso"
-  descricao   String?
+  descricao   String?  @db.Text
   prioridade  String   @default("normal") // "baixa", "normal", "alta"
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt

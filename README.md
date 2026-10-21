@@ -64,7 +64,7 @@ lexflow-sistema-juridico/
 
 ### Pré-requisitos
 
-- Node.js (versão 16 ou superior)
+- Node.js 24.11.1 (faixa suportada: >=24.11.0 <25)
 - npm ou yarn
 
 ### 1. Backend Setup
@@ -73,9 +73,9 @@ lexflow-sistema-juridico/
 cd backend
 npm install
 cp .env.example .env
-# Ajuste as credenciais do servidor de produção no arquivo .env
+# Ajuste a conexão com um MySQL LOCAL de desenvolvimento no arquivo .env
 npx prisma generate
-npx prisma db push
+npx prisma migrate deploy
 # Opcional: crie contas de QA apenas com npm run seed:test em desenvolvimento/homologação.
 npm run dev
 ```
@@ -119,7 +119,7 @@ Abra o navegador e acesse: `http://localhost:5000/api/health`
 
 ### Verificar Frontend
 
-Abra: `http://localhost:5173/`
+Abra: `http://localhost:5173/tecti/2026/gpec02/`
 
 A interface deve carregar e permitir login/cadastro.
 
@@ -181,3 +181,43 @@ O arquivo `Insomnia_LexFlow.json` contém as requisições organizadas por funci
 ## 📄 Licença
 
 ISC
+
+## Deploy
+
+### Frontend — Hostinger / Apache
+
+Diretório: `frontend/`. Instale com `npm install` (ou `npm ci` para reproduzir o lockfile).
+Copie `.env.production.example` para `.env.production` e preencha `VITE_API_URL` com a URL HTTPS real do Render **seguida de `/api`**. Variáveis Vite são públicas e incorporadas na build, não lidas pelo Apache.
+
+O caminho público é `/tecti/2026/gpec02/`, definido em `vite.config.js` (`base`). O `BrowserRouter` usa `import.meta.env.BASE_URL`. Se mudar o caminho, ajuste também `public/.htaccess`.
+Execute `npm run build`. A saída é `frontend/dist/`, incluindo `.htaccess`, manifesto, ícone e assets. Sem URL de produção válida, a build falha intencionalmente.
+
+> Transfira o CONTEÚDO da pasta `dist` para a pasta correspondente ao projeto no servidor Apache.
+
+No FileZilla, mostre arquivos ocultos e inclua `.htaccess` junto de `index.html` em `/tecti/2026/gpec02/` (relativo à raiz pública do domínio). Não crie uma pasta `dist` dentro desse caminho. O Apache precisa de `mod_rewrite` e permitir estas diretivas via `AllowOverride`.
+
+### Backend — Render
+
+- Diretório e Root Directory: `backend`.
+- Runtime: Node; versão recomendada `24.11.1`, definida em `backend/.node-version`.
+- Build Command: `npm ci --omit=dev && npx prisma generate`.
+- Start Command: `npm start` (`node server.js`, sem nodemon).
+- Health Check Path: `/health` (também preservado `/api/health`).
+- Variáveis: `NODE_ENV=production`, `DATABASE_URL`, `JWT_SECRET`, `FRONTEND_URL`.
+- O Render fornece `PORT`: não a crie manualmente. Bind em `0.0.0.0`.
+- `FRONTEND_URL`: origem HTTPS real da Hostinger, sem subpasta. CORS aceita apenas as origens configuradas; `CORS_ALLOWED_ORIGINS` permanece como alternativa legada. Prefira configurar somente `FRONTEND_URL`.
+- Prisma Client é dependência de runtime; o CLI também está disponível para geração e migrations.
+- Execute `npx prisma migrate deploy` manualmente antes de iniciar a versão que exige a migration, nunca acoplado ao start. Não há build/transpilação JavaScript no backend.
+- Recomenda-se Auto Deploy desabilitado no primeiro deploy; habilite depois da validação integrada e de estabelecer a etapa de migrations.
+
+### Banco
+
+MySQL externo via Prisma 6.19.3. `DATABASE_URL=mysql://USUARIO:SENHA_URL_ENCODED@HOST:PORTA/BANCO` (substitua os marcadores; não publique credenciais). Configure acesso remoto/firewall para o Render e TLS conforme seu provedor; não desabilite a verificação de certificados.
+
+A migration `20261021000000_init_mysql` cria as tabelas e relações do schema atual. Foi gerada sem conectar a banco e **não foi aplicada**. Para banco vazio autorizado: `npx prisma migrate deploy`; confira `npx prisma migrate status`. Para banco existente, faça backup, compare o schema e prepare um baseline revisado antes de executar qualquer migration. A troca de SQLite para MySQL não transfere dados automaticamente.
+
+Há seed apenas de teste/homologação: não execute `npm run seed:test` em produção. O cadastro público cria perfil `usuario`; o primeiro administrador real deve ser provisionado manualmente por responsável autorizado, sem usar contas fictícias.
+
+**Segurança:** há credenciais MySQL remotas e JWT no histórico de `backend/.env`. Rotacione/substitua essas credenciais antes de publicar. `.gitignore` não remove segredos do histórico.
+
+Consulte [DEPLOY.md](DEPLOY.md) para sequência operacional, pendências, testes e configuração copiável. Esta seção prevalece sobre instruções antigas dos relatórios históricos.

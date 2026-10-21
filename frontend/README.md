@@ -1,3 +1,5 @@
+> Para produção, siga a seção Deploy do [README principal](../README.md#deploy) e o [guia operacional](../DEPLOY.md). O caminho público atual é `/tecti/2026/gpec02/`; exemplos antigos abaixo não substituem essa configuração.
+
 # Frontend LexFlow
 
 Este diretório contém a aplicação frontend do LexFlow, construída com React, Vite e Tailwind CSS.

@@ -1,18 +1,7 @@
 import axios from 'axios';
 
-const getRuntimeEnv = () => {
-  if (typeof import.meta !== 'undefined' && import.meta.env) {
-    return import.meta.env;
-  }
-
-  if (typeof process !== 'undefined' && process.env) {
-    return process.env;
-  }
-
-  return {};
-};
-
-const API_BASE_URL = getRuntimeEnv().VITE_API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL?.replace(/\/+$/, '');
+if (!API_BASE_URL) throw new Error('Configure VITE_API_URL antes de iniciar ou gerar a build.');
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -28,7 +17,7 @@ api.interceptors.request.use(
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    console.log('API Request:', config.method?.toUpperCase(), config.url);
+
     return config;
   },
   (error) => {
@@ -48,8 +37,9 @@ api.interceptors.response.use(
       localStorage.removeItem('token');
       localStorage.removeItem('user');
 
-      if (window.location.pathname !== '/login') {
-        window.location.assign('/login');
+      const loginPath = `${import.meta.env.BASE_URL}login`;
+      if (window.location.pathname !== loginPath) {
+        window.location.assign(loginPath);
       }
     }
 

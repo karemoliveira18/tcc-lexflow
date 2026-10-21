@@ -1,48 +1,31 @@
 import assert from 'node:assert/strict';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
-import { existsSync, rmSync } from 'node:fs';
 import path from 'node:path';
 import { after, test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import request from 'supertest';
 
 const backendRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '../..');
-const testDatabaseName = `lexflow-test-${process.pid}-${randomUUID()}.db`;
-const testDatabasePath = path.join(backendRoot, 'prisma', testDatabaseName);
 const testPassword = () => `${randomBytes(24).toString('base64url')}Aa7!`;
-
+// Dedicated disposable MySQL database only; never fall back to DATABASE_URL.
+const testUrl = process.env.TEST_DATABASE_URL;
+if (!testUrl || !new URL(testUrl).pathname.startsWith('/lexflow_test_')) {
+  throw new Error('Set TEST_DATABASE_URL to a dedicated MySQL database named lexflow_test_*.');
+}
 process.env.NODE_ENV = 'test';
 process.env.JWT_SECRET = randomBytes(48).toString('hex');
-process.env.CORS_ALLOWED_ORIGINS = 'http://localhost:5173';
-process.env.DATABASE_URL = `file:./${testDatabaseName}`;
-
+process.env.FRONTEND_URL = 'http://localhost:5173';
+process.env.DATABASE_URL = testUrl;
 execFileSync(process.execPath, [
   path.join(backendRoot, 'node_modules', 'prisma', 'build', 'index.js'),
-  'db',
-  'push',
-  '--schema',
-  path.join(backendRoot, 'prisma', 'schema.prisma'),
-  '--skip-generate',
-], {
-  cwd: backendRoot,
-  env: process.env,
-  stdio: 'inherit',
-});
-
+  'migrate', 'deploy',
+], { cwd: backendRoot, env: process.env, stdio: 'inherit' });
 const [{ app }, { prisma }, { hashPassword, comparePassword }] = await Promise.all([
-  import('../../server.js'),
-  import('../../db.js'),
-  import('../../services/authService.js'),
+  import('../../server.js'), import('../../db.js'), import('../../services/authService.js'),
 ]);
-
-after(async () => {
-  await prisma.$disconnect();
-  for (const suffix of ['', '-journal', '-shm', '-wal']) {
-    const filePath = `${testDatabasePath}${suffix}`;
-    if (existsSync(filePath)) rmSync(filePath, { force: true });
-  }
-});
+after(async () => { await prisma.$disconnect(); });
+// Records remain in the dedicated test database for inspection.
 
 test('health endpoint works without auth', async () => {
   const res = await request(app).get('/api/health');

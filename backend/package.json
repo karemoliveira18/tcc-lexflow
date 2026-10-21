@@ -14,7 +14,9 @@
     "test:integration": "node --test tests/integration/*.test.mjs",
     "test:prisma": "npx prisma validate --schema prisma/schema.prisma",
     "test:syntax": "node --check server.js && node --check config/env.js && node --check db.js && node --check middleware/auth.js && node --check middleware/authorization.js && node --check middleware/validate.js && node --check utils/validation.js && node --check controllers/authController.js && node --check controllers/userController.js && node --check controllers/clienteController.js && node --check controllers/processoController.js && node --check controllers/dashboardController.js",
-    "test:full": "npm run test:unit && npm run test:integration && npm run test:prisma && npm run test:syntax"
+    "test:full": "npm run test:unit && npm run test:integration && npm run test:prisma && npm run test:syntax",
+    "prisma:generate": "prisma generate",
+    "migrate:deploy": "prisma migrate deploy"
   },
   "keywords": [
     "lexflow",
@@ -26,20 +28,24 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@prisma/adapter-mariadb": "^7.8.0",
     "bcryptjs": "^3.0.3",
     "cors": "^2.8.6",
     "dotenv": "^16.6.1",
     "express": "^4.22.1",
     "jsonwebtoken": "^9.0.3",
-    "prisma": "^6.19.3",
-    "sqlite3": "^6.0.1",
-    "zod": "^4.6.4"
+    "prisma": "6.19.3",
+    "zod": "^4.6.4",
+    "@prisma/client": "6.19.3"
   },
   "devDependencies": {
-    "@prisma/client": "^6.19.3",
     "nodemon": "^3.1.14",
     "supertest": "^7.2.2"
   },
-  "type": "module"
+  "type": "module",
+  "engines": {
+    "node": ">=24.11.0 <25"
+  },
+  "overrides": {
+    "qs": "^6.16.1"
+  }
 }
