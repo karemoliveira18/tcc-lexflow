@@ -102,6 +102,24 @@ Este projeto usa MySQL via Prisma ORM. A configuração da conexão está em `ba
 
 O comando `npm run seed:test` cria de forma idempotente um administrador e dois advogados com e-mails reservados no domínio `.test`. Ele não redefine o banco nem remove registros. Execute-o somente em desenvolvimento ou homologação, com `NODE_ENV` e `LEXFLOW_ALLOW_TEST_USERS=true` definidos e as variáveis `LEXFLOW_TEST_ADMIN_PASSWORD`, `LEXFLOW_TEST_LAWYER1_PASSWORD` e `LEXFLOW_TEST_LAWYER2_PASSWORD` preenchidas com senhas fortes diferentes. As senhas são validadas e gravadas somente como hash bcrypt; não são armazenadas no repositório.
 
+### Executar o seed de teste
+
+Use somente um banco de desenvolvimento/homologação. Em `backend/.env`, configure `NODE_ENV=development`, `LEXFLOW_ALLOW_TEST_USERS=true` e as três variáveis `LEXFLOW_TEST_ADMIN_PASSWORD`, `LEXFLOW_TEST_LAWYER1_PASSWORD` e `LEXFLOW_TEST_LAWYER2_PASSWORD`. Cada senha precisa ter 20–191 caracteres, maiúscula, minúscula, número e símbolo. Não coloque senhas no campo `passwordVariable` do script: esse campo contém o **nome da variável de ambiente**.
+
+No diretório `backend`, execute:
+
+```bash
+npx prisma validate
+npx prisma generate
+npx prisma migrate status
+# Depois de confirmar que as tabelas/migrations estão prontas:
+npm run seed:test
+# Alternativa equivalente, agora registrada no prisma.config.ts:
+# npx prisma db seed
+```
+
+Se migrations estiverem pendentes em um banco de desenvolvimento vazio/autorizado, aplique `npx prisma migrate deploy` antes do seed. Para banco existente sem histórico de migrations, revise o baseline antes de aplicar. O seed faz upsert das três contas fictícias e redefine suas senhas/perfis; não deve ser usado para criar contas reais em produção. Todas as senhas são validadas antes da primeira gravação.
+
 ## 🧪 Testes e Validação
 
 ### Verificar Backend
@@ -216,8 +234,16 @@ MySQL externo via Prisma 6.19.3. `DATABASE_URL=mysql://USUARIO:SENHA_URL_ENCODED
 
 A migration `20261021000000_init_mysql` cria as tabelas e relações do schema atual. Foi gerada sem conectar a banco e **não foi aplicada**. Para banco vazio autorizado: `npx prisma migrate deploy`; confira `npx prisma migrate status`. Para banco existente, faça backup, compare o schema e prepare um baseline revisado antes de executar qualquer migration. A troca de SQLite para MySQL não transfere dados automaticamente.
 
-Há seed apenas de teste/homologação: não execute `npm run seed:test` em produção. O cadastro público cria perfil `usuario`; o primeiro administrador real deve ser provisionado manualmente por responsável autorizado, sem usar contas fictícias.
+Há um seed de teste/homologação e uma carga real separada (`npm run seed:production`): não execute `npm run seed:test` em produção. O cadastro público cria perfil `usuario`; o primeiro administrador real pode ser provisionado pela carga de produção, com dados fornecidos pelo responsável autorizado.
 
 **Segurança:** há credenciais MySQL remotas e JWT no histórico de `backend/.env`. Rotacione/substitua essas credenciais antes de publicar. `.gitignore` não remove segredos do histórico.
 
 Consulte [DEPLOY.md](DEPLOY.md) para sequência operacional, pendências, testes e configuração copiável. Esta seção prevalece sobre instruções antigas dos relatórios históricos.
+
+## Carga inicial real de produção
+
+Use `npm run seed:production` em `backend/` para carregar diretamente no banco definido por `DATABASE_URL` em `backend/.env`. Para somente validar sem gravar, use `npm run seed:production -- --check`. Não é necessário repetir o nome do banco ou definir NODE_ENV para esse comando.
+
+O arquivo `backend/prisma/seed.production.example.json` prepara um administrador inicial e listas opcionais de usuários, clientes e processos reais. Copie para `seed.production.json` (ignorado pelo Git), preencha os dados reais e configure as senhas em variáveis de ambiente. Nenhum dado pessoal ou senha real está no exemplo.
+
+Siga [o guia completo da carga de produção](backend/prisma/SEED_PRODUCTION.md) para variáveis, todos os campos, validação, migrations e aplicação. A carga preserva registros existentes e não promove contas nem redefine senhas. O seed de teste continua separado e bloqueado em produção.

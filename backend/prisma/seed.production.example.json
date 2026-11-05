@@ -1,0 +1,14 @@
+{
+  "users": [
+    {
+      "key": "administrador-inicial",
+      "nome": "",
+      "email": "",
+      "perfil": "admin",
+      "ativo": true,
+      "passwordEnv": "LEXFLOW_PROD_ADMIN_PASSWORD"
+    }
+  ],
+  "clientes": [],
+  "processos": []
+}

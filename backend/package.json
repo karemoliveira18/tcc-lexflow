@@ -8,6 +8,7 @@
     "dev": "nodemon server.js",
     "seed": "node prisma/seed.js",
     "seed:test": "node prisma/seed.js",
+    "seed:production": "node prisma/seed.production.js",
     "migrate": "prisma migrate dev",
     "migrate:reset": "prisma migrate reset --force",
     "test:unit": "node --test tests/unit/*.test.mjs",

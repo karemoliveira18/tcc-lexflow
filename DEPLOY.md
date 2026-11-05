@@ -167,7 +167,7 @@ O servidor conecta ao banco antes de escutar: banco inacessível faz o start fal
 
 Prisma/MySQL usa somente DATABASE_URL para conexão. Há uma migration inicial que cria User, Cliente e Processo, índices e relações. Leia o SQL antes de aplicar. Para banco vazio: `npx prisma migrate deploy`. Para banco com tabelas: backup, comparação e baseline orientado pelo schema real antes de aplicar; não marque migration como aplicada sem provar equivalência. Nenhum reset faz parte do deploy.
 
-Existe seed restrito a desenvolvimento/homologação. Nunca habilite LEXFLOW_ALLOW_TEST_USERS na produção. O primeiro admin real requer provisionamento manual autorizado; `/api/auth/register` cria usuário comum. Não há tela de cadastro no frontend atual.
+Existe seed de teste restrito a desenvolvimento/homologação e uma carga real separada: `npm run seed:production -- --check` (validação) / `npm run seed:production` (aplicação usando DATABASE_URL do .env). Consulte [SEED_PRODUCTION.md](backend/prisma/SEED_PRODUCTION.md). Nunca habilite LEXFLOW_ALLOW_TEST_USERS na produção. O primeiro admin real pode ser criado pela carga de produção com dados reais autorizados; `/api/auth/register` cria usuário comum. Não há tela de cadastro no frontend atual.
 
 ## J. Checklist final e evidências
 
@@ -291,7 +291,7 @@ npx prisma migrate status
 ```
 
 4. Em banco existente, interrompa esse fluxo até comparar schema e preparar baseline revisado. Nunca use reset ou db push como fluxo de produção. Dados SQLite antigos exigem transferência separada e conferida.
-5. Não rode seed de teste. Crie/provisione o administrador real por procedimento autorizado; contas cadastradas na API começam com perfil usuario.
+5. Não rode seed de teste. Crie o administrador real com a carga de produção documentada em `backend/prisma/SEED_PRODUCTION.md`; contas cadastradas na API começam com perfil usuario.
 6. Verifique logs de conexão do Render, autentique uma conta real autorizada e consulte `/api/clientes` e `/api/processos`. Health sozinho não consulta o banco.
 
 ## AMBIENTE 5 — TESTE INTEGRADO FINAL
